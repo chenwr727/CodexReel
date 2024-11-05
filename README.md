@@ -11,6 +11,8 @@
 
 天龙八部 第01章 青衫磊落险峰行
 
+[试听](644.mp3)
+
 <audio controls>
   <source src="644.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
