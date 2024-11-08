@@ -14,7 +14,7 @@
 [试听](644.mp3)
 
 <audio controls>
-  <source src="644.mp3" type="audio/mpeg">
+  <source src="https://github.com/chenwr727/Novels-Podcast-Generator/raw/refs/heads/main/644.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 
