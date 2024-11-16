@@ -15,7 +15,6 @@ class TextToSpeechConverter:
         self.model = model
         self.voices = voices
         self.chapter = chapter
-        self.output_file = f"{chapter}.mp3"
 
         dashscope.api_key = self.api_key
 
@@ -47,10 +46,12 @@ class TextToSpeechConverter:
                 os.remove(file_name)
             return None
 
-    def text_to_speech(self, dialogues):
+    def text_to_speech(self, dialogues, output_file):
         file_names = []
 
-        for i, dialogue in tqdm(enumerate(dialogues), desc="生成语音"):
+        for i, dialogue in tqdm(
+            enumerate(dialogues), desc="生成语音", total=len(dialogues)
+        ):
             file_name = self.process_dialogue(i, dialogue)
             if file_name:
                 file_names.append(file_name)
@@ -71,7 +72,7 @@ class TextToSpeechConverter:
                     f"concat:{file_list}",
                     "-acodec",
                     "copy",
-                    self.output_file,
+                    output_file,
                 ],
                 check=True,
             )
