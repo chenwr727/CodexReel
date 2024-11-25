@@ -10,16 +10,16 @@ from utils.log import logger
 
 
 class TextToSpeechConverter:
-    def __init__(self, api_key, model, voices, chapter):
+    def __init__(self, api_key: str, model: str, voices: list[str], folder: str):
         self.api_key = api_key
         self.model = model
         self.voices = voices
-        self.chapter = chapter
+        self.folder = folder
 
         dashscope.api_key = self.api_key
 
-    def process_dialogue(self, index, dialogue, retry_delay=2):
-        file_name = os.path.join(self.chapter, f"{index}.mp3")
+    def process_dialogue(self, index: int, dialogue: dict, retry_delay: int = 2):
+        file_name = os.path.join(self.folder, f"{index}.mp3")
         if os.path.exists(file_name):
             return file_name
 
@@ -46,7 +46,7 @@ class TextToSpeechConverter:
                 os.remove(file_name)
             return None
 
-    def text_to_speech(self, dialogues, output_file):
+    def text_to_speech(self, dialogues: list[dict], output_file: str):
         file_names = []
 
         for i, dialogue in tqdm(
