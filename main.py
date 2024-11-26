@@ -76,8 +76,6 @@ def main(url: str):
         with open(file_prompt, "r", encoding="utf-8") as f:
             prompt = f.read()
     else:
-        with open(file_txt, "r", encoding="utf-8") as f:
-            content = f.readline()
         description = text_json["description"]
         prompt = assistant.writer(description, config["image"]["prompt_image"])
         with open(file_prompt, "w", encoding="utf-8") as f:

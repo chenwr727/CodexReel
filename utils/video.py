@@ -23,7 +23,13 @@ from moviepy.editor import (
 
 
 def create_video_from_audio_and_image(
-    audio: AudioFileClip, image: ImageClip, video_width: int, fps: int, step: int = 1
+    audio: AudioFileClip,
+    image: ImageClip,
+    video_width: int,
+    fps: int,
+    offset: int = None,
+    direction: int = None,
+    step: int = 1,
 ) -> VideoClip:
     original_width = image.size[0]
     original_height = image.size[1]
@@ -31,8 +37,12 @@ def create_video_from_audio_and_image(
     video_height = original_height
 
     frames = []
-    offset = random.randint(0, original_width - video_width - 1)
-    direction = random.choice([1, -1])
+    offset = (
+        random.randint(0, original_width - video_width - 1)
+        if offset is None
+        else offset
+    )
+    direction = random.choice([1, -1]) if direction is None else direction
     for _ in range(math.ceil(audio.duration * fps)):
         if offset >= original_width - video_width:
             direction = -1
@@ -47,7 +57,7 @@ def create_video_from_audio_and_image(
     video = concatenate_videoclips(frames, method="compose")
     video = video.set_audio(audio)
 
-    return video
+    return video, offset, direction
 
 
 def create_video(
@@ -61,8 +71,9 @@ def create_video(
 
     image_width = images[0].size[0]
     video_width = int(image_width / 16 * 9)
-    subtitle_width = video_width * 0.85
+    subtitle_width = video_width * 0.8
     estimated_font_size = int(subtitle_width / 16)
+    subtitle_position = int(images[0].size[1] * 2 / 3)
 
     for i, dialogue in tqdm(
         enumerate(dialogues), desc="Creating video", total=len(dialogues)
@@ -71,29 +82,44 @@ def create_video(
         if os.path.exists(video_file):
             continue
 
-        audio_file = os.path.join(audio_directory, f"{i}.mp3")
-        audio = AudioFileClip(audio_file)
+        texts = dialogue["contents"]
+        videos = []
+        txt_clips = []
+        offset = None
+        direction = None
+        duration_start = 0
+        for j, text in enumerate(texts):
+            audio_file = os.path.join(audio_directory, f"{i}_{j}.mp3")
+            audio = AudioFileClip(audio_file)
 
-        text = dialogue["content"]
-        txt_clip = TextClip(
-            text,
-            fontsize=estimated_font_size,
-            color="white",
-            stroke_color="black",
-            size=(subtitle_width, None),
-            font="Microsoft-YaHei-Bold-&-Microsoft-YaHei-UI-Bold",
-            align="West",
-            method="caption",
-        )
-        txt_clip = txt_clip.set_position(("center", "center"))
+            txt_clip = TextClip(
+                text,
+                fontsize=estimated_font_size,
+                color="white",
+                stroke_color="black",
+                size=(subtitle_width, None),
+                font="Microsoft-YaHei-Bold-&-Microsoft-YaHei-UI-Bold",
+                align="center",
+                method="caption",
+            )
+            txt_clip = txt_clip.set_position(
+                ("center", subtitle_position - txt_clip.size[1] // 2)
+            )
 
-        image_index = i % len(image_files)
-        video = create_video_from_audio_and_image(
-            audio, images[image_index], video_width, fps
-        )
+            image_index = i % len(image_files)
+            video, offset, direction = create_video_from_audio_and_image(
+                audio, images[image_index], video_width, fps, offset, direction
+            )
 
-        txt_clip = txt_clip.set_duration(video.duration)
-        final_video = CompositeVideoClip([video] + [txt_clip])
+            txt_clip = txt_clip.set_duration(video.duration).set_start(duration_start)
+            video = video.set_start(duration_start)
+
+            videos.append(video)
+            txt_clips.append(txt_clip)
+
+            duration_start += video.duration
+
+        final_video = CompositeVideoClip(videos + txt_clips)
 
         try:
             final_video.write_videofile(video_file, codec="libx264", fps=fps)
