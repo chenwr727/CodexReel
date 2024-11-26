@@ -118,7 +118,7 @@ pip install -r requirements.txt
 
 #### 运行项目
 1. 确保配置文件 `config.toml` 已正确配置。
-2. 运行主脚本 `main.py` 并传入小说内容的URL作为参数。
+2. 运行主脚本 `main.py` 并传入URL作为参数。
 
 ```sh
 python main.py https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg

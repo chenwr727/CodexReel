@@ -118,7 +118,7 @@ The project requires a `config.toml` file. Here’s how to set it up:
 
 #### Running the Project
 1. Ensure `config.toml` is properly configured.
-2. Run the main script with the URL of the content to process:
+2. Run the main script with the URL to process:
 
 ```sh
 python main.py https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg
