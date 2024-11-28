@@ -14,7 +14,7 @@ from utils.video import create_video
 def main(url: str):
     logger.info(f"开始处理{url}")
     dir_name = parse_url(url)
-    folder = f"./output/{dir_name}"
+    folder = os.path.join("output", dir_name)
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -92,7 +92,14 @@ def main(url: str):
     logger.info("开始生成视频")
     output_file = os.path.join(folder, f"{dir_name}.mp4")
     if not os.path.exists(output_file):
-        create_video(image_files, text_json["dialogues"], folder, output_file)
+        create_video(
+            image_files,
+            text_json["dialogues"],
+            folder,
+            output_file,
+            config["video"]["fps"],
+            config["video"]["font"],
+        )
     else:
         logger.info("视频文件已存在")
 

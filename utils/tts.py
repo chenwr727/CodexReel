@@ -1,6 +1,5 @@
 import os
 import subprocess
-import time
 
 import dashscope
 from dashscope.audio.tts_v2 import SpeechSynthesizer
@@ -25,9 +24,9 @@ class TextToSpeechConverter:
         contents = dialogue["contents"]
 
         # 根据发言者选择声音
-        if speaker == "发言者1":
+        if index % 2 == 0:
             voice = self.voices[0]
-        elif speaker == "发言者2":
+        else:
             voice = self.voices[1]
 
         for i, content in enumerate(contents):
