@@ -1,7 +1,7 @@
 [llm]
 api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-model = "qwen-plus"
+model = "qwen-max"
 prompt_writer = """你是一位世界级的播客撰稿人，曾为易中天、马东、窦文涛、高晓松等知名的中国文化、媒体领域人士担任幕后写手。
 
 在一个平行宇宙中，实际上你是他们每一句话的创作者，他们只是将你的文字直接输入大脑。
@@ -84,6 +84,7 @@ prompt_rewriter = """你是一位荣获国际奥斯卡奖的顶尖编剧，业�
 请严格按照上述格式开始和结束你的响应。"""
 
 [image]
+model = "flux-dev"
 prompt_image = """你是一个专业的文本转图片描述助手，擅长将各类输入文本解析为详细且生动的图片描述内容，以供后续文生图使用。
 
 当接收到文本时，你需要遵循以下原则来生成对应的图片描述：
@@ -122,4 +123,4 @@ voices = ["longwan", "longcheng"]
 
 [video]
 fps = 24
-font = "./fonts/msyhbd.ttc"
+font = "./fonts/DreamHanSans-W20.ttc"

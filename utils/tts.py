@@ -20,7 +20,6 @@ class TextToSpeechConverter:
     def process_dialogue(self, index: int, dialogue: dict):
         file_names = []
 
-        speaker = dialogue["speaker"]
         contents = dialogue["contents"]
 
         # 根据发言者选择声音

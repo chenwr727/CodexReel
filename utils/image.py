@@ -14,7 +14,7 @@ class ImageAssistant:
         dashscope.api_key = api_key
 
     def generate_image(
-        self, prompt: str, n: int = 2, size: str = "1024*1024"
+        self, prompt: str, model: str, n: int = 2, size: str = "1024*1024"
     ) -> list[str]:
         for i in range(n):
             file_name = os.path.join(self.chapter, f"{i}.png")
@@ -24,9 +24,7 @@ class ImageAssistant:
             return [os.path.join(self.chapter, f"{i}.png") for i in range(n)]
 
         file_names = []
-        rsp = ImageSynthesis.call(
-            model=ImageSynthesis.Models.wanx_v1, prompt=prompt, n=n, size=size
-        )
+        rsp = ImageSynthesis.call(model=model, prompt=prompt, n=n, size=size)
         if rsp.status_code == HTTPStatus.OK:
             for i, result in enumerate(rsp.output.results):
                 file_name = os.path.join(self.chapter, f"{i}.png")

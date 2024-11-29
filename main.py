@@ -85,6 +85,7 @@ def main(url: str):
     assistant = ImageAssistant(config["llm"]["api_key"], folder)
     image_files = assistant.generate_image(
         prompt,
+        config["image"]["model"],
         config["image"]["image_num"],
         config["image"]["image_size"],
     )
