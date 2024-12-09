@@ -57,4 +57,4 @@ def get_content(url: str, max_retries: int = 3, retry_delay: int = 2):
 
 
 def parse_url(url: str):
-    return url.replace("http://", "").replace("https://", "").replace("/", "_")
+    return url.replace("http://", "").replace("https://", "").replace("/", "_").replace("?", "_")

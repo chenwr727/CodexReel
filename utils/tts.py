@@ -34,7 +34,9 @@ class TextToSpeechConverter:
                 file_names.append(file_name)
                 continue
             try:
-                synthesizer = SpeechSynthesizer(model=self.model, voice=voice)
+                synthesizer = SpeechSynthesizer(
+                    model=self.model, voice=voice, speech_rate=1.1
+                )
                 audio = synthesizer.call(content)
                 with open(file_name, "wb") as f:
                     f.write(audio)

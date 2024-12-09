@@ -95,9 +95,11 @@ def main(url: str):
     if not os.path.exists(output_file):
         create_video(
             image_files,
-            text_json["dialogues"],
+            text_json,
             folder,
             output_file,
+            config["video"]["opening_audio"],
+            config["video"]["background_audio"],
             config["video"]["fps"],
             config["video"]["font"],
         )
