@@ -39,38 +39,6 @@ def find_split_index(
 def wrap_text_by_punctuation_and_width(
     text: str, max_width: int, font: str, fontsize: int
 ) -> str:
-
-    def process_line():
-        nonlocal current_line
-        split_index = len(current_line)
-        for i in range(len(current_line) - 1, 0, -1):
-            temp_clip = TextClip(
-                font, current_line[:i], font_size=fontsize, color="white"
-            )
-            if temp_clip.size[0] <= max_width:
-                split_index = i
-                break
-
-        lines.append(current_line[:split_index])
-        current_line = current_line[split_index:]
-
-        while current_line and re.match(punctuation, current_line[0]):
-            lines[-1] += current_line[0]
-            current_line = current_line[1:]
-
-        if current_line and re.match(english_char, current_line[0]):
-            last_line = lines[-1]
-
-            i = len(last_line) - 1
-            while i >= 0 and re.match(english_char, last_line[i]):
-                i -= 1
-
-            if i > 0:
-                english_part = last_line[i + 1 :]
-                lines[-1] = last_line[: i + 1]
-                current_line = english_part + current_line
-        return current_line
-
     punctuation = r"[，。！？]"
     english_char = r"[a-zA-Z]"
     words = re.split(f"({punctuation})", text)
@@ -83,19 +51,43 @@ def wrap_text_by_punctuation_and_width(
             current_line += word
             continue
 
-        current_line = current_line + word
-        temp_clip = TextClip(font, current_line, font_size=fontsize, color="white")
+        current_line += word
 
-        if temp_clip.size[0] > max_width:
-            process_line()
+        while current_line:
+            temp_clip = TextClip(font, current_line, font_size=fontsize, color="white")
+            if temp_clip.size[0] <= max_width:
+                break
+            else:
+                split_index = len(current_line)
+                for i in range(len(current_line) - 1, 0, -1):
+                    temp_clip = TextClip(
+                        font, current_line[:i], font_size=fontsize, color="white"
+                    )
+                    if temp_clip.size[0] <= max_width:
+                        split_index = i
+                        break
 
-    while current_line:
-        temp_clip = TextClip(font, current_line, font_size=fontsize, color="white")
-        if temp_clip.size[0] <= max_width:
-            lines.append(current_line)
-            break
-        else:
-            process_line()
+                lines.append(current_line[:split_index])
+                current_line = current_line[split_index:]
+
+                while current_line and re.match(punctuation, current_line[0]):
+                    lines[-1] += current_line[0]
+                    current_line = current_line[1:]
+
+                if current_line and re.match(english_char, current_line[0]):
+                    last_line = lines[-1]
+
+                    i = len(last_line) - 1
+                    while i >= 0 and re.match(english_char, last_line[i]):
+                        i -= 1
+
+                    if i > 0:
+                        english_part = last_line[i + 1 :]
+                        lines[-1] = last_line[: i + 1]
+                        current_line = english_part + current_line
+
+    if current_line:
+        lines.append(current_line)
 
     return "\n".join(lines)
 
