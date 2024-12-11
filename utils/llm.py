@@ -10,7 +10,7 @@ class LLmWriter:
         self.model = model
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
 
-    def writer(self, system_prompt: str, content: str) -> str:
+    def writer(self, content: str, system_prompt: str) -> str:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},
