@@ -1,231 +1,171 @@
 English | [简体中文](README.md)
 
-### NotebookQwen 
+# NotebookQwen
 
 #### Project Overview
-This project is inspired by NotebookLlama and aims to extract text from a given URL, generate podcast scripts, and convert them into video files. 
+This project is inspired by NotebookLlama and aims to extract text from the input URL, generate podcast text, and convert it into a video file.
 
-The project workflow is divided into the following steps:
-1. Extract webpage content and save it as a text file.
-2. Use LLM (Large Language Model) to generate podcast scripts.
-3. Convert the generated podcast script into audio files.
-4. Convert the podcast script into image files.
-5. Combine the generated audio and image files into video files.
+The project mainly consists of the following steps:
+1. Retrieve web content and save it as a text file.
+2. Use LLM (Large Language Model) to generate podcast text.
+3. Convert the generated podcast text into an audio file.
+4. Convert the generated podcast text into image files.
+5. Combine the audio and image files into a video file.
 
 #### Demo
 
-[9.1 Rating! A Must-Watch Chinese Film, *Good Stuff*](https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg)
+[Huawei Mate Brand Festival Summary: Mate 70, Mate X6, Pure HarmonyOS, Zunjie S800...](https://www.ithome.com/0/813/427.htm)
 
-[![9.1 Rating! A Must-Watch Chinese Film, *Good Stuff*](https://img.youtube.com/vi/rv-vXynEj6M/0.jpg)](https://www.youtube.com/watch?v=rv-vXynEj6M)
+https://github.com/user-attachments/assets/e1a7100e-a30b-4b6d-8a65-824f338acada
 
 ```json
 {
-    "description": "揭秘高分国产电影《好东西》的魅力。",
+    "description": "Huawei Mate Brand Festival: A Feast of Technology and Innovation",
     "dialogues": [
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "大家好，欢迎收听我们的节目。",
-                "今天我们要聊聊一部神作——《好东西》。",
-                "这部电影不仅豆瓣评分高达9.1，还收获了无数好评。"
+                "Welcome to this episode of Tech Exploration Podcast!",
+                "I'm Xiao Jian, and today we're going to talk about a tech feast.",
+                "That is the recently concluded Huawei Mate Brand Festival."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "哇，9.1分，这确实很高！",
-                "这部电影到底有什么特别之处呢？",
-                "你能先给我们介绍一下它的基本情况吗？"
+                "Hi, Xiao Jian, it's great to discuss tech topics with you again.",
+                "This Huawei Mate Brand Festival sounds really exciting.",
+                "What are your initial impressions of this event?"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "当然可以。《好东西》是导演邵艺辉的新作。",
-                "她之前的《爱情神话》也大获成功。",
-                "这次，她讲述的是三个女性在上海的生活故事。"
+                "It was indeed very exciting, especially the release of the Mate 70 series and the Mate X6 foldable phone.",
+                "These two products not only have exquisite designs but also many technological breakthroughs.",
+                "There is also the Pure HarmonyOS and a series of all-scenario products, which are truly dazzling."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "三个女性？听起来很有趣。",
-                "她们分别是谁呢？",
-                "她们之间有什么特别的互动吗？"
+                "Wow, that sounds really impressive!",
+                "Especially this 'Pure HarmonyOS', I've always been curious about it.",
+                "What does it actually mean?"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "这三位女性分别是单亲妈妈王铁梅，乐队主唱小叶，",
-                "还有王铁梅的女儿王茉莉。",
-                "她们各自有着不同的背景和性格。"
+                "'Pure HarmonyOS' refers to Huawei's completely self-developed operating system, no longer relying on third-party components.",
+                "This means that the HarmonyOS will be more secure, stable, and provide a smoother user experience.",
+                "This is an important milestone for domestic operating systems."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "嗯，这些角色听起来都很有特点。",
-                "你能具体说说她们的性格吗？",
-                "比如王铁梅是个怎样的人？"
+                "Yes, this is indeed a huge progress.",
+                "The operating system is the core of the entire ecosystem, and complete self-development can enhance security and user experience.",
+                "By the way, Xiao Jian, you mentioned the Mate 70 series, what are the special features of its design and performance?"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "王铁梅非常独立，事业有成，还独自抚养女儿。",
-                "小叶则是一个典型的‘恋爱脑’，渴望爱情，",
-                "但同时保持自尊。"
+                "The design of the Mate 70 series is very classic, adopting a central axis symmetrical design, with the rear camera module adorned with 'star light nails'.",
+                "In terms of materials, it features 'golden silk brocade' and 'oriental brocade', giving a sense of high quality.",
+                "As for the screen, the standard version is a 6.7-inch flat screen, while the Pro and Pro+ are 6.9-inch quad-curve screens."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "哇，这两个角色已经很吸引人了。",
-                "那王茉莉呢？她是个怎样的孩子？",
-                "9岁的孩子能有多深刻？"
+                "Wow, 2500 nits of brightness, that's like being able to see clearly even in the dark!",
+                "By the way, Xiao Jian, did you notice anything special about the Mate 70's camera at the launch event?"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "王茉莉虽然只有9岁，但非常成熟和智慧。",
-                "她对世界的看法常常让人眼前一亮。",
-                "她的存在为故事增添了独特的视角。"
+                "The camera of the Mate 70 is indeed very noteworthy.",
+                "It debuts with the Maple Leaf Original Color Imaging System, equipped with a Maple Leaf Original Color Camera with 1.5 million multi-spectral channels.",
+                "The color reproduction accuracy has been improved by 120%, and it also supports the AI Movie Texture Engine."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "这真是三个非常有魅力的角色。",
-                "她们之间的互动是怎么样的呢？",
-                "有没有什么特别的情节？"
+                "That sounds really attractive!",
+                "I love taking photos, especially when traveling.",
+                "If I had a phone like this, I could definitely take a lot of beautiful pictures."
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "她们之间的互动非常紧密。",
-                "王铁梅像母亲一样照顾小叶和王茉莉。",
-                "小叶则在情感上支持王铁梅。"
+                "That's right, the three-network satellite communication function of the Mate X6 foldable phone is also very advanced.",
+                "It supports Beidou satellite messages, Tiantong satellite communication, and low-orbit satellite internet.",
+                "This means that even in areas without ground network coverage, users can send and receive messages via satellite."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "嗯，这种互助和支持真的很温暖。",
-                "电影中有没有一些特别打动人的场景？",
-                "比如某个温馨的日常片段？"
+                "Wow, that's really amazing!",
+                "Imagine if you got lost in a remote area, you could still send a distress signal via satellite.",
+                "This is literally a lifeline!"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "有一场戏是小叶主动帮王铁梅照顾王茉莉。",
-                "这场戏展现了小叶的善良和体贴。",
-                "还有她们一起做饭、聊天的场景，非常真实温暖。"
+                "There are many other noteworthy products at this launch event.",
+                "For example, the WATCH D2, which is Huawei's first dynamic blood pressure monitoring smartwatch.",
+                "It can achieve 24-hour blood pressure monitoring and generate professional dynamic blood pressure reports."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "这些场景确实很能打动人心。",
-                "电影中还有一些关于女性主义的元素，",
-                "比如上野千鹤子的书和金斯伯格的T恤。"
+                "Hearing you say this, I'm really tempted.",
+                "Especially the WATCH D2, for someone like me who travels frequently, it's really useful to monitor blood pressure anytime."
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "是的，这些细节反映了角色的内心世界。",
-                "王铁梅经常提到上野千鹤子的书，",
-                "小叶则引用金斯伯格的话来鼓励自己。"
+                "There's also the FreeBuds Pro 4 earphones, which are Huawei's first TWS earphones equipped with Pure HarmonyOS.",
+                "They support 48kHz/24bit lossless transmission, and the sound quality is excellent."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "这些细节确实让角色更加立体。",
-                "不过，电影中的男性角色好像被边缘化了。",
-                "这是导演有意为之吗？"
+                "Hearing you say this, I can't wait to try these new products.",
+                "Xiao Jian, what are your overall impressions of this launch event?"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "是的，导演邵艺辉希望更多聚焦于女性的生活和情感。",
-                "男性角色虽然存在，但更多的是作为背景。",
-                "这种处理方式让主题更加鲜明。"
+                "Overall, I think this launch event was very successful.",
+                "Huawei not only demonstrated strong technological innovation capabilities but also showed an extreme pursuit of user experience.",
+                "Every product is full of surprises, and I believe it will cause quite a stir in the market."
             ]
         },
         {
-            "speaker": "发言者2",
+            "speaker": "Lao Chen",
             "contents": [
-                "这种处理方式确实很独特。",
-                "电影在情感上有哪些特别打动人的地方？",
-                "有没有让你印象深刻的场景？"
+                "Yes, I'm also looking forward to the launch of these products.",
+                "I hope they can bring more convenience and joy to our lives.",
+                "Well, that's all for today's show, thank you all for listening, see you next time!"
             ]
         },
         {
-            "speaker": "发言者1",
+            "speaker": "Xiao Jian",
             "contents": [
-                "电影的情感处理非常细腻。",
-                "比如小叶在铁梅忙时主动帮忙照顾王茉莉。",
-                "这些场景让人感受到女性之间的深厚友谊。"
-            ]
-        },
-        {
-            "speaker": "发言者2",
-            "contents": [
-                "嗯，这些场景确实很温暖。",
-                "对了，电影中有个关于家务的蒙太奇，",
-                "那个场景真的很有创意。"
-            ]
-        },
-        {
-            "speaker": "发言者1",
-            "contents": [
-                "是的，那个蒙太奇非常有创意。",
-                "导演通过自然声效来表现家务活，",
-                "比如晾衣服像打雷，煎鸡蛋像下暴雨。"
-            ]
-        },
-        {
-            "speaker": "发言者2",
-            "contents": [
-                "哈哈，这个比喻真的太妙了。",
-                "我从来没有想过家务活还能这么有趣。",
-                "这部电影真的让人感到开心和平静。"
-            ]
-        },
-        {
-            "speaker": "发言者1",
-            "contents": [
-                "是的，这部电影传递了积极向上的生活态度。",
-                "在这个充满压力的时代，",
-                "看到这样一部温暖幽默的电影是一种享受。"
-            ]
-        },
-        {
-            "speaker": "发言者2",
-            "contents": [
-                "谢谢你的详细介绍。",
-                "我已经迫不及待想去电影院看这部电影了。",
-                "大家如果感兴趣，也一定要去看看。"
-            ]
-        },
-        {
-            "speaker": "发言者1",
-            "contents": [
-                "没错，希望大家能在《好东西》中找到温暖和感动。",
-                "好了，今天的节目就到这里。",
-                "感谢大家的收听，我们下次再见！"
-            ]
-        },
-        {
-            "speaker": "发言者2",
-            "contents": [
-                "再见，大家！"
+                "Thank you all, see you next time!"
             ]
         }
     ]
@@ -236,6 +176,7 @@ The project workflow is divided into the following steps:
 ```
 project/
 ├── main.py
+├── app.py
 ├── utils/
 │   ├── config.py
 │   ├── image.py
@@ -244,25 +185,32 @@ project/
 │   ├── processing.py
 │   ├── tts.py
 │   └── video.py
+├── web/
+│   ├── __init__.py
+│   ├── api.py
+│   ├── config.py
+│   ├── model.py
+│   ├── service.py
+│   └── session.py
 ├── config-template.toml
 └── config.toml
 ```
 
-#### Installation
-Ensure the following dependencies are installed:
+#### Install Dependencies
+Make sure to install the following dependencies:
 ```sh
 pip install -r requirements.txt
 ```
 
-#### Configuration
-The project requires a `config.toml` file. Here’s how to set it up:
+#### Configuration File
+The project requires a configuration file `config.toml`, as shown below:
 
 1. Copy the template file:
    ```sh
    cp config-template.toml config.toml
    ```
 
-2. Edit `config.toml`:
+2. Modify the `config.toml` file content:
    ```toml
    [llm]
    api_key = "YOUR_LLM_API_KEY"
@@ -277,15 +225,57 @@ The project requires a `config.toml` file. Here’s how to set it up:
    voices = ["voice1", "voice2"]
    ```
 
-#### Running the Project
-1. Ensure `config.toml` is properly configured.
-2. Run the main script with the URL to process:
+#### Run the Project
+1. Ensure the `config.toml` file is correctly configured.
+2. Run the main script `main.py` and pass the URL as a parameter.
 
 ```sh
 python main.py https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg
 ```
 
-#### Acknowledgments
+#### API Endpoints
+
+```sh
+python app.py
+```
+
+The project provides the following API endpoints:
+
+- **Create Task**
+  - **URL**: `/v1/tasks`
+  - **Method**: `POST`
+  - **Request Body**:
+    ```json
+    {
+      "name": "https://example.com/article"
+    }
+    ```
+  - **Response**:
+    - Success: `201 Created`
+    - Failure: `400 Bad Request` or `500 Internal Server Error`
+
+- **Get Task Status**
+  - **URL**: `/v1/tasks/:task_id`
+  - **Method**: `GET`
+  - **Response**:
+    - Success: `200 OK`
+    - Failure: `404 Not Found` or `500 Internal Server Error`
+
+- **Get Queue Status**
+  - **URL**: `/v1/tasks/queue/status`
+  - **Method**: `GET`
+  - **Response**:
+    - Success: `200 OK`
+    - Failure: `500 Internal Server Error`
+
+- **Cancel Task**
+  - **URL**: `/v1/tasks/cancel/:task_id`
+  - **Method**: `GET`
+  - **Response**:
+    - Success: `200 OK`
+    - Failure: `404 Not Found`, `400 Bad Request`, or `500 Internal Server Error`
+
+#### Acknowledgements
 - [NotebookLlama](https://github.com/meta-llama/llama-recipes/tree/main/recipes/quickstart/NotebookLlama)
 
-We hope this README is helpful! Feel free to reach out with any questions or suggestions.
+I hope this README helps! If you have any questions or suggestions, please feel free to contact.

@@ -176,6 +176,7 @@ https://github.com/user-attachments/assets/e1a7100e-a30b-4b6d-8a65-824f338acada
 ```
 project/
 ├── main.py
+├── app.py
 ├── utils/
 │   ├── config.py
 │   ├── image.py
@@ -184,6 +185,13 @@ project/
 │   ├── processing.py
 │   ├── tts.py
 │   └── video.py
+├── web/
+│   ├── __init__.py
+│   ├── api.py
+│   ├── config.py
+│   ├── model.py
+│   ├── service.py
+│   └── session.py
 ├── config-template.toml
 └── config.toml
 ```
@@ -224,6 +232,48 @@ pip install -r requirements.txt
 ```sh
 python main.py https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg
 ```
+
+#### API 接口
+
+```sh
+python app.py
+```
+
+项目提供了以下 API 接口：
+
+- **创建任务**
+  - **URL**: `/v1/tasks`
+  - **方法**: `POST`
+  - **请求体**:
+    ```json
+    {
+      "name": "https://example.com/article"
+    }
+    ```
+  - **响应**:
+    - 成功: `201 Created`
+    - 失败: `400 Bad Request` 或 `500 Internal Server Error`
+
+- **获取任务状态**
+  - **URL**: `/v1/tasks/:task_id`
+  - **方法**: `GET`
+  - **响应**:
+    - 成功: `200 OK`
+    - 失败: `404 Not Found` 或 `500 Internal Server Error`
+
+- **获取队列状态**
+  - **URL**: `/v1/tasks/queue/status`
+  - **方法**: `GET`
+  - **响应**:
+    - 成功: `200 OK`
+    - 失败: `500 Internal Server Error`
+
+- **取消任务**
+  - **URL**: `/v1/tasks/cancel/:task_id`
+  - **方法**: `GET`
+  - **响应**:
+    - 成功: `200 OK`
+    - 失败: `404 Not Found` 或 `400 Bad Request` 或 `500 Internal Server Error`
 
 #### 致谢
 - [NotebookLlama](https://github.com/meta-llama/llama-recipes/tree/main/recipes/quickstart/NotebookLlama)

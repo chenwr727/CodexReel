@@ -13,7 +13,7 @@ class ImageAssistant:
         self.chapter = chapter
         dashscope.api_key = api_key
 
-    def generate_image(
+    async def generate_image(
         self, prompt: str, model: str, n: int = 2, size: str = "1024*1024"
     ) -> list[str]:
         for i in range(n):
