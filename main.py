@@ -116,7 +116,7 @@ async def url2video(url: str):
     else:
         logger.info("视频文件已存在")
     if os.path.exists(output_file):
-        return os.path.abspath(output_file)
+        return output_file
 
 
 if __name__ == "__main__":

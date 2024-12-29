@@ -1,15 +1,13 @@
-import os
+from utils.config import load_config
 
-from dotenv import load_dotenv
-
-load_dotenv()
+config = load_config()
 
 
 class Settings:
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///tasks.db")
-    APP_PORT = int(os.getenv("APP_PORT", "8000"))
-    MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "1"))
-    TASK_TIMEOUT_SECONDS = int(os.getenv("TASK_TIMEOUT_SECONDS", "600"))
+    DATABASE_URL = config["api"]["database_url"]
+    APP_PORT = config["api"]["app_port"]
+    MAX_CONCURRENT_TASKS = config["api"]["max_concurrent_tasks"]
+    TASK_TIMEOUT_SECONDS = config["api"]["task_timeout_seconds"]
 
 
 settings = Settings()

@@ -1,183 +1,186 @@
-简体中文 | [English](README_EN.md)
-
 # NotebookQwen
 
-#### 项目概述
-本项目参考NotebookLlama，旨在从输入的网址中提取文本，生成播客文本，并将其转换为视频文件。
-
-项目主要分为以下几个步骤：
-1. 获取网页内容并保存为文本文件。
-2. 使用LLM（大型语言模型）生成播客文本。
-3. 将生成的播客文本转换为语音文件。
-4. 将生成的播客文本转换为图片文件。
-5. 将生成的语音和图片文件转换为视频文件。
-
+本项目参考NotebookLlama，是一个自动化生成视频的项目，通过从指定的URL获取内容，生成播客脚本，合成语音，生成图片，并最终生成视频。
 #### Demo
 
 [华为 Mate 品牌盛典一文汇总：Mate 70、Mate X6、纯血鸿蒙、尊界 S800...](https://www.ithome.com/0/813/427.htm)
 
-https://github.com/user-attachments/assets/e1a7100e-a30b-4b6d-8a65-824f338acada
-
 ```json
 {
-    "description": "华为 Mate 品牌盛典：科技与创新的盛宴",
+    "description": "华为盛典",
     "dialogues": [
         {
             "speaker": "小简",
             "contents": [
-                "欢迎来到本期的科技探索播客！",
-                "我是小简，今天我们要聊一场科技盛宴。",
-                "那就是刚刚结束的华为 Mate 品牌盛典。"
+                "各位，今天我们来聊聊华为的新鲜玩意儿，",
+                "Mate 70系列可谓是“史上最强大”的手机！",
+                "这名字可不是白叫的。"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "嗨，小简，很高兴又和你一起探讨科技话题。",
-                "这次的华为 Mate 品牌盛典听起来真的很精彩。",
-                "你对这次发布会有什么初步印象吗？"
+                "史上最强大？",
+                "这名字听着可真有气势，",
+                "感觉就像是手机中的超人啊！",
+                "这手机要是跟我一起出门，",
+                "我得给它个超人披风！"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "确实非常精彩，尤其是 Mate 70 系列和 Mate X6 折叠屏手机的发布。",
-                "这两款产品不仅设计精美，技术上也有很多突破。",
-                "还有纯血鸿蒙系统和一系列全场景产品，真是让人目不暇接。"
+                "你觉得这手机需要披风吗？",
+                "它已经有“金丝锦纤”和“东方锦色”这些高大上的名字了，",
+                "跟你一起跟风出门，",
+                "直接改成“锦衣卫”了！"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "哇，听起来真的很厉害！",
-                "特别是这个‘纯血鸿蒙系统’，我一直很好奇。",
-                "它到底是什么意思呢？"
+                "哈哈，我还想说，屏幕才真牛，",
+                "居然支持1-120Hz动态刷新率！",
+                "你说如果我老陈用上这个手机，",
+                "能不能比我老婆的语速还快？"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "‘纯血鸿蒙’是指华为完全自主开发的操作系统，不再依赖第三方组件。",
-                "这意味着鸿蒙系统将更加安全、稳定，用户体验也会更流畅。",
-                "这是国产操作系统的一个重要里程碑。"
+                "这可难说，",
+                "她要是用心说话，120Hz也追不上，",
+                "更何况你右手太慢啊！",
+                "不过Mate 70的摄像头倒是真的不错，",
+                "5000万像素的变焦，",
+                "拍个远处的风景简直是“跨世代的远近”。"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "嗯，这确实是一个巨大的进步。",
-                "操作系统是整个生态的核心，完全自主开发能提升安全性和用户体验。",
-                "对了，小简，你提到的 Mate 70 系列，它的设计和性能有哪些特别之处呢？"
+                "我听说Mate 70还可以卫星寻呼？",
+                "那得多牛啊，",
+                "跟外星人聊天也不成问题了！",
+                "我觉得我可以问问外星人，",
+                "‘你们的手机是哪个品牌？’"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "Mate 70 系列的设计非常经典，采用中轴对称设计，后置镜头模组点缀着‘星光饰钉’。",
-                "材质方面，主打‘金丝锦纤’和‘东方锦色’，给人以高级感。",
-                "屏幕方面，标准版是 6.7 英寸直屏，Pro 和 Pro+ 是 6.9 英寸等深四曲屏。"
+                "哈哈，外星人肯定会告诉你，",
+                "他们那叫“银河手机”，",
+                "支持宇宙网络，",
+                "信号比你的流量卡强多了！"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "哇，2500nit 的亮度，这简直是在黑暗中也能看得清清楚楚啊！",
-                "对了，小简，你在发布会上有没有注意到 Mate 70 的摄像头有什么特别之处？"
+                "说到流量卡，让我想到了“尊界 S800”！",
+                "这车启动得快得过飞机，",
+                "零百加速3.3秒，",
+                "难不成我坐上去能飞到北京喝咖啡？"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "Mate 70 的摄像头确实非常值得关注。",
-                "它首发搭载了红枫原色影像系统，配备 150 万多光谱通道的红枫原色摄像头。",
-                "色彩还原准确度提升了 120%，还支持 AI 电影质感引擎。"
+                "当然能飞！",
+                "要是新保姆没跟上，坐在车里说：",
+                "‘我看了一下，今儿个下雪了，’",
+                "你直接跟她说，",
+                "‘没关系，我是高速通行证！’"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "听起来真的很吸引人！",
-                "我平时喜欢拍照，特别是旅行的时候。",
-                "如果有一台这样的手机，肯定能拍出很多漂亮的照片。"
+                "高速通行证！哈哈，",
+                "进到车顶上直接一键开启“智驾模式”，",
+                "那才是灵魂出窍的感觉。"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "没错，Mate X6 折叠屏手机的三网卫星通信功能也非常前沿。",
-                "它支持北斗卫星消息、天通卫星通信以及低轨卫星互联网。",
-                "这意味着即使在没有地面网络覆盖的情况下，用户也可以通过卫星发送和接收信息。"
+                "没错！不过你知道吗，",
+                "这次发布会上还有一款腕表，",
+                "价格23999元，连黄金都镶嵌了。",
+                "要是我戴上这块表，",
+                "能不能让人以为我是在带财神？"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "哇，这真的太棒了！",
-                "想象一下，如果你在偏远地区迷路了，还能通过卫星发送求救信号。",
-                "这简直是救命稻草啊！"
+                "财神到！",
+                "难不成我也得给自己配一款手表，",
+                "看看哪个小区的老太太能先发现我。",
+                "我是“高贵大爷”？"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "这次发布会还有很多其他值得关注的产品。",
-                "比如 WATCH D2，它是华为首款动态血压监测智能手表。",
-                "可以实现 24 小时的血压监测，并生成专业的动态血压报告。"
+                "哈哈，希望那时候你别把自己的老花镜丢了，",
+                "别到时候给新手表盖了膜，",
+                "结果只能当一块砖头，",
+                "用来阻挡阳光！"
             ]
         },
         {
             "speaker": "老陈",
             "contents": [
-                "听你这么一说，我都有点心动了。",
-                "特别是 WATCH D2，对于像我这样经常出差的人来说，随时监测血压真的很有用。"
+                "说得好！",
+                "这华为盛典就像换头大戏，",
+                "都是高科技和奢华的再组合，",
+                "但归根结底，",
+                "我们还是要用心生活，",
+                "才能把生活过得金光闪闪！"
             ]
         },
         {
             "speaker": "小简",
             "contents": [
-                "还有 FreeBuds Pro 4 耳机，这是华为首款搭载纯血鸿蒙系统的 TWS 耳机。",
-                "支持 48kHz/24bit 无损传输，音质非常出色。"
-            ]
-        },
-        {
-            "speaker": "老陈",
-            "contents": [
-                "听你这么一说，我都有点迫不及待想试试这些新产品了。",
-                "小简，你对这次发布会的整体感受如何？"
-            ]
-        },
-        {
-            "speaker": "小简",
-            "contents": [
-                "总的来说，我觉得这次发布会非常成功。",
-                "华为不仅展示了强大的技术创新能力，还展现了对用户体验的极致追求。",
-                "每一款产品都充满了惊喜，相信会在市场中引起不小的轰动。"
-            ]
-        },
-        {
-            "speaker": "老陈",
-            "contents": [
-                "嗯，我也非常期待这些产品的上市。",
-                "希望它们能给我们的生活带来更多的便利和乐趣。",
-                "好了，今天的节目就到这里，感谢大家的收听，我们下期再见！"
-            ]
-        },
-        {
-            "speaker": "小简",
-            "contents": [
-                "谢谢大家，我们下次节目再见！"
+                "没错！",
+                "不管技术多么牛，",
+                "最后生活中的快乐，",
+                "都是自主创造的！",
+                "希望每位朋友都能像华为的新品一样，",
+                "绽放出最精彩的光彩！",
+                "谢谢大家！"
             ]
         }
     ]
 }
 ```
 
-#### 目录结构
+## 目录
+
+- [项目结构](#项目结构)
+- [安装](#安装)
+- [配置](#配置)
+- [运行](#运行)
+- [项目功能](#项目功能)
+- [目录说明](#目录说明)
+- [示例](#示例)
+- [贡献](#贡献)
+- [许可证](#许可证)
+
+## 项目结构
+
 ```
-project/
-├── main.py
+.
 ├── app.py
+├── config-template.toml
+├── config.toml
+├── main.py
+├── requirements.txt
+├── run.sh
 ├── utils/
+│   ├── __init__.py
 │   ├── config.py
 │   ├── image.py
 │   ├── llm.py
@@ -185,97 +188,126 @@ project/
 │   ├── processing.py
 │   ├── tts.py
 │   └── video.py
-├── web/
-│   ├── __init__.py
-│   ├── api.py
-│   ├── config.py
-│   ├── model.py
-│   ├── service.py
-│   └── session.py
-├── config-template.toml
-└── config.toml
+└── web/
+    ├── __init__.py
+    ├── config.py
+    ├── crud.py
+    ├── database.py
+    ├── models.py
+    ├── schemas.py
+    ├── service.py
+    └── web.py
 ```
 
-#### 安装依赖
-确保安装了以下依赖库：
-```sh
-pip install -r requirements.txt
-```
+## 安装
 
-#### 配置文件
-项目需要一个配置文件 `config.toml`，示例如下：
+1. 克隆仓库到本地：
 
-1. 复制模板文件：
+   ```sh
+   git clone https://github.com/chenwr727/NotebookQwen.git
+   cd NotebookQwen
+   ```
+
+2. 创建并激活虚拟环境：
+
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # 对于Windows系统，使用 `venv\Scripts\activate`
+   ```
+
+3. 安装依赖：
+
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+## 配置
+
+1. 复制 `config-template.toml` 并重命名为 `config.toml`：
+
    ```sh
    cp config-template.toml config.toml
    ```
 
-2. 修改 `config.toml` 文件内容：
-   ```toml
-   [llm]
-   api_key = "YOUR_LLM_API_KEY"
-   base_url = "https://api.example.com"
-   model = "your_model_name"
-   prompt_writer = "Your initial prompt for generating the podcast"
-   prompt_rewriter = "Your rewriter prompt for refining the podcast"
+2. 编辑 `config.toml` 文件，填写相应的API密钥和配置。
 
-   [tts]
-   api_key = "YOUR_TTS_API_KEY"
-   model = "your_tts_model_name"
-   voices = ["voice1", "voice2"]
+## 运行
+
+### 启动服务
+
+1. 启动FastAPI应用：
+
+   ```sh
+   python app.py
    ```
 
-#### 运行项目
-1. 确保配置文件 `config.toml` 已正确配置。
-2. 运行主脚本 `main.py` 并传入URL作为参数。
+2. 启动Streamlit应用：
+
+   ```sh
+   streamlit run web.py --server.port 8000
+   ```
+
+### 使用脚本
+
+1. 运行 `main.py` 脚本处理指定URL：
+
+   ```sh
+   python main.py <url>
+   ```
+
+### 使用Shell脚本
+
+1. 使用 `run.sh` 脚本管理服务：
+
+   ```sh
+   # 启动服务
+   ./run.sh start
+
+   # 停止服务
+   ./run.sh stop
+
+   # 重启服务
+   ./run.sh restart
+   ```
+
+## 项目功能
+
+- 从指定URL获取内容并解析。
+- 使用LLM生成播客脚本。
+- 合成语音并生成音频文件。
+- 生成图片。
+- 合成视频并生成最终视频文件。
+- 提供基于FastAPI的API接口和基于Streamlit的Web界面。
+
+## 目录说明
+
+- `app.py`：FastAPI应用入口。
+- `main.py`：主脚本，处理URL并生成视频。
+- `utils/`：工具模块，包括配置加载、日志记录、图像生成、LLM处理、语音合成、视频处理等。
+- `web/`：Web相关模块，包括数据库、模型、CRUD操作、服务等。
+- `web.py`：Streamlit应用入口。
+- `run.sh`：管理服务的Shell脚本。
+- `config-template.toml`：配置模板文件。
+- `requirements.txt`：项目依赖列表。
+
+## 示例
+
+以下是一个示例命令，用于处理指定的URL并生成视频：
 
 ```sh
-python main.py https://mp.weixin.qq.com/s/sGEcVIxH6TkIjeWew-LSJg
+python main.py https://example.com/article
 ```
 
-#### API 接口
+## 贡献
 
-```sh
-python app.py
-```
+欢迎贡献代码！请提交Pull Request或报告问题。具体步骤如下：
 
-项目提供了以下 API 接口：
+1. Fork 本仓库。
+2. 创建新分支 (`git checkout -b feature/new-feature`)。
+3. 提交更改 (`git commit -am 'Add some feature'`)。
+4. 推送到新分支 (`git push origin feature/new-feature`)。
+5. 提交Pull Request。
 
-- **创建任务**
-  - **URL**: `/v1/tasks`
-  - **方法**: `POST`
-  - **请求体**:
-    ```json
-    {
-      "name": "https://example.com/article"
-    }
-    ```
-  - **响应**:
-    - 成功: `201 Created`
-    - 失败: `400 Bad Request` 或 `500 Internal Server Error`
+## 许可证
 
-- **获取任务状态**
-  - **URL**: `/v1/tasks/:task_id`
-  - **方法**: `GET`
-  - **响应**:
-    - 成功: `200 OK`
-    - 失败: `404 Not Found` 或 `500 Internal Server Error`
-
-- **获取队列状态**
-  - **URL**: `/v1/tasks/queue/status`
-  - **方法**: `GET`
-  - **响应**:
-    - 成功: `200 OK`
-    - 失败: `500 Internal Server Error`
-
-- **取消任务**
-  - **URL**: `/v1/tasks/cancel/:task_id`
-  - **方法**: `GET`
-  - **响应**:
-    - 成功: `200 OK`
-    - 失败: `404 Not Found` 或 `400 Bad Request` 或 `500 Internal Server Error`
-
-#### 致谢
-- [NotebookLlama](https://github.com/meta-llama/llama-recipes/tree/main/recipes/quickstart/NotebookLlama)
-
-希望这个README对你有帮助！如果有任何问题或建议，请随时联系。
+此项目使用MIT许可证。详情参见 [LICENSE](LICENSE) 文件。

@@ -1,11 +1,13 @@
 aiosqlite
 beautifulsoup4
 dashscope
+fastapi
 loguru
 moviepy
 openai
 Requests
-robyn
 sqlalchemy
+streamlit
 toml
 tqdm
+uvicorn

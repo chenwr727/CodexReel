@@ -179,3 +179,12 @@ fps = 24
 font = "./fonts/DreamHanSans-W20.ttc"
 opening_audio = "./demo/opening.mp3"
 background_audio = "./demo/bgm.mp3"
+
+[api]
+database_url = "sqlite+aiosqlite:///tasks.db"
+app_port = 8000
+max_concurrent_tasks = 1
+task_timeout_seconds = 600
+
+[web]
+password = "password"
