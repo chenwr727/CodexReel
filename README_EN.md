@@ -6,6 +6,8 @@ NotebookQwen is an automated video generation project inspired by NotebookLlama.
 
 [Huawei Mate Brand Gala Summary: Mate 70, Mate X6, Pure HarmonyOS, Zunjie S800...](https://www.ithome.com/0/813/427.htm)
 
+https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
+
 ```json
 {
     "description": "Huawei Gala",

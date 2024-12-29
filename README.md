@@ -5,6 +5,8 @@
 
 [华为 Mate 品牌盛典一文汇总：Mate 70、Mate X6、纯血鸿蒙、尊界 S800...](https://www.ithome.com/0/813/427.htm)
 
+https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
+
 ```json
 {
     "description": "华为盛典",
