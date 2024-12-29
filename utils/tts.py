@@ -17,16 +17,13 @@ class TextToSpeechConverter:
 
         dashscope.api_key = self.api_key
 
-    def process_dialogue(self, index: int, dialogue: dict):
+    async def process_dialogue(self, index: int, dialogue: dict):
         file_names = []
 
         contents = dialogue["contents"]
 
         # 根据发言者选择声音
-        if index % 2 == 0:
-            voice = self.voices[0]
-        else:
-            voice = self.voices[1]
+        voice = self.voices[index % 2]
 
         for i, content in enumerate(contents):
             file_name = os.path.join(self.folder, f"{index}_{i}.mp3")
@@ -35,7 +32,7 @@ class TextToSpeechConverter:
                 continue
             try:
                 synthesizer = SpeechSynthesizer(
-                    model=self.model, voice=voice, speech_rate=1.1
+                    model=self.model, voice=voice, speech_rate=1.2
                 )
                 audio = synthesizer.call(content)
                 with open(file_name, "wb") as f:
@@ -48,33 +45,33 @@ class TextToSpeechConverter:
                 return None
         return file_names
 
-    def text_to_speech(self, dialogues: list[dict], output_file: str):
+    async def text_to_speech(self, dialogues: list[dict], output_file: str):
         file_list = []
 
         for i, dialogue in tqdm(
             enumerate(dialogues), desc="生成语音", total=len(dialogues)
         ):
-            file_names = self.process_dialogue(i, dialogue)
+            file_names = await self.process_dialogue(i, dialogue)
             if file_names:
                 file_list.extend(file_names)
             else:
                 logger.error(f"无法合成{i}的语音")
                 return
 
-        try:
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-i",
-                    f"concat:{'|'.join(file_list)}",
-                    "-acodec",
-                    "copy",
-                    output_file,
-                ],
-                check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            logger.error(f"FFmpeg执行失败: {e}")
-        except Exception as e:
-            logger.error(f"未知错误: {e}")
+        # try:
+        #     subprocess.run(
+        #         [
+        #             "ffmpeg",
+        #             "-y",
+        #             "-i",
+        #             f"concat:{'|'.join(file_list)}",
+        #             "-acodec",
+        #             "copy",
+        #             output_file,
+        #         ],
+        #         check=True,
+        #     )
+        # except subprocess.CalledProcessError as e:
+        #     logger.error(f"FFmpeg执行失败: {e}")
+        # except Exception as e:
+        #     logger.error(f"未知错误: {e}")

@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 import os
 
@@ -11,7 +12,7 @@ from utils.tts import TextToSpeechConverter
 from utils.video import create_video
 
 
-def main(url: str):
+async def url2video(url: str):
     logger.info(f"开始处理{url}")
     dir_name = parse_url(url)
     folder = os.path.join("output", dir_name)
@@ -29,7 +30,7 @@ def main(url: str):
     if not os.path.exists(file_json):
         if not os.path.exists(file_txt):
             logger.info("开始获取内容")
-            text = get_content(url)
+            text = await get_content(url)
             if text:
                 with open(file_txt, "w", encoding="utf-8") as f:
                     f.write(text)
@@ -44,9 +45,11 @@ def main(url: str):
 
         logger.info("开始生成播客")
         logger.info("第一次生成播客")
-        text_writer = assistant.writer(content, config["llm"]["prompt_writer"])
+        text_writer = await assistant.writer(content, config["llm"]["prompt_writer"])
         logger.info("第二次生成播客")
-        text_rewriter = assistant.writer(text_writer, config["llm"]["prompt_rewriter"])
+        text_rewriter = await assistant.writer(
+            text_writer, config["llm"]["prompt_rewriter"]
+        )
         text_json = json.loads(text_rewriter)
         with open(file_json, "w", encoding="utf-8") as f:
             json.dump(text_json, f, ensure_ascii=False, indent=4)
@@ -65,25 +68,32 @@ def main(url: str):
             config["tts"]["voices"],
             folder,
         )
-        converter.text_to_speech(text_json["dialogues"], output_file)
+        await converter.text_to_speech(text_json["dialogues"], output_file)
     else:
         logger.info("语音文件已存在")
 
     logger.info("开始生成图片")
+    prompt = ""
     file_prompt = os.path.join(folder, "prompt.txt")
     if os.path.exists(file_prompt):
-        logger.info("图片提示已存在")
         with open(file_prompt, "r", encoding="utf-8") as f:
             prompt = f.read()
-    else:
+    if not prompt:
         description = text_json["description"]
-        prompt = assistant.writer(description, config["image"]["prompt_image"])
+        assistant = LLmWriter(
+            config["image"]["api_key"],
+            config["image"]["base_url"],
+            config["image"]["model_llm"],
+        )
+        prompt = await assistant.writer(description, config["image"]["prompt_image"])
         with open(file_prompt, "w", encoding="utf-8") as f:
             f.write(prompt)
+    else:
+        logger.info("图片提示已存在")
     logger.info(prompt)
 
-    assistant = ImageAssistant(config["llm"]["api_key"], folder)
-    image_files = assistant.generate_image(
+    assistant = ImageAssistant(config["image"]["api_key"], folder)
+    image_files = await assistant.generate_image(
         prompt,
         config["image"]["model"],
         config["image"]["image_num"],
@@ -93,7 +103,7 @@ def main(url: str):
     logger.info("开始生成视频")
     output_file = os.path.join(folder, f"{dir_name}.mp4")
     if not os.path.exists(output_file):
-        create_video(
+        await create_video(
             image_files,
             text_json,
             folder,
@@ -105,6 +115,8 @@ def main(url: str):
         )
     else:
         logger.info("视频文件已存在")
+    if os.path.exists(output_file):
+        return output_file
 
 
 if __name__ == "__main__":
@@ -114,4 +126,4 @@ if __name__ == "__main__":
     parser.add_argument("url", type=str, help="The URL of the content to process")
     args = parser.parse_args()
 
-    main(args.url)
+    asyncio.run(url2video(args.url))
