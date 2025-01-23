@@ -1,4 +1,4 @@
-# NotebookQwen
+# URL2VideoStudio
 
 本项目参考NotebookLlama，是一个自动化生成视频的项目，通过从指定的URL获取内容，生成播客脚本，合成语音，生成图片，并最终生成视频。
 #### Demo
@@ -206,8 +206,8 @@ https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
 1. 克隆仓库到本地：
 
    ```sh
-   git clone https://github.com/chenwr727/NotebookQwen.git
-   cd NotebookQwen
+   git clone https://github.com/chenwr727/URL2VideoStudio.git
+   cd URL2VideoStudio
    ```
 
 2. 创建并激活虚拟环境：

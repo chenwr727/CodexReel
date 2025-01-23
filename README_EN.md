@@ -1,6 +1,6 @@
-# NotebookQwen
+# URL2VideoStudio
 
-NotebookQwen is an automated video generation project inspired by NotebookLlama. It retrieves content from a specified URL, generates a podcast script, synthesizes speech, creates images, and ultimately produces a video.
+URL2VideoStudio is an automated video generation project inspired by NotebookLlama. It retrieves content from a specified URL, generates a podcast script, synthesizes speech, creates images, and ultimately produces a video.
 
 #### Demo
 
@@ -206,8 +206,8 @@ https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
 1. Clone the repository to your local machine:
 
    ```sh
-   git clone https://github.com/chenwr727/NotebookQwen.git
-   cd NotebookQwen
+   git clone https://github.com/chenwr727/URL2VideoStudio.git
+   cd URL2VideoStudio
    ```
 
 2. Create and activate a virtual environment:
