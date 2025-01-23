@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 
 from utils.config import load_config
 from utils.image import ImageAssistant
@@ -12,12 +13,9 @@ from utils.tts import TextToSpeechConverter
 from utils.video import create_video
 
 
-async def url2video(url: str):
+async def url2video(url: str, doc_id: int = None):
     logger.info(f"开始处理{url}")
-    dir_name = parse_url(url)
-    folder = os.path.join("output", dir_name)
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    folder, dir_name = parse_url(url, doc_id)
 
     config = load_config()
 
@@ -29,14 +27,16 @@ async def url2video(url: str):
 
     if not os.path.exists(file_json):
         if not os.path.exists(file_txt):
-            logger.info("开始获取内容")
-            text = await get_content(url)
-            if text:
-                with open(file_txt, "w", encoding="utf-8") as f:
-                    f.write(text)
+            if url.startswith("http"):
+                logger.info("开始获取内容")
+                text = await get_content(url)
+                if not text:
+                    logger.error("获取内容失败")
+                    return
             else:
-                logger.error("获取内容失败")
-                return
+                text = url
+            with open(file_txt, "w", encoding="utf-8") as f:
+                f.write(text)
         else:
             logger.info("网页文件已存在")
 
@@ -44,12 +44,25 @@ async def url2video(url: str):
             content = f.read()
 
         logger.info("开始生成播客")
-        logger.info("第一次生成播客")
+        logger.info("初稿生成")
         text_writer = await assistant.writer(content, config["llm"]["prompt_writer"])
-        logger.info("第二次生成播客")
-        text_rewriter = await assistant.writer(
-            text_writer, config["llm"]["prompt_rewriter"]
+        logger.info("文案反思")
+        text_reflector = await assistant.writer(
+            text_writer, config["llm"]["prompt_reflector"]
         )
+        logger.info("文案优化")
+        text_rewriter = await assistant.writer(
+            f"初稿文案：\n{text_writer}\n\n反思建议：\n{text_reflector}", config["llm"]["prompt_rewriter"]
+        )
+
+        json_pattern = r"(\{.*\s?\})"
+        matches = re.findall(json_pattern, text_rewriter, flags=re.DOTALL)
+        if matches:
+            text_rewriter = matches[0]
+        else:
+            logger.error("生成播客失败")
+            return
+
         text_json = json.loads(text_rewriter)
         with open(file_json, "w", encoding="utf-8") as f:
             json.dump(text_json, f, ensure_ascii=False, indent=4)
@@ -79,13 +92,13 @@ async def url2video(url: str):
         with open(file_prompt, "r", encoding="utf-8") as f:
             prompt = f.read()
     if not prompt:
-        description = text_json["description"]
+        topic = text_json["topic"]
         assistant = LLmWriter(
             config["image"]["api_key"],
             config["image"]["base_url"],
             config["image"]["model_llm"],
         )
-        prompt = await assistant.writer(description, config["image"]["prompt_image"])
+        prompt = await assistant.writer(topic, config["image"]["prompt_image"])
         with open(file_prompt, "w", encoding="utf-8") as f:
             f.write(prompt)
     else:

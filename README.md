@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
 
 ```json
 {
-    "description": "华为盛典",
+    "topic": "华为盛典",
     "dialogues": [
         {
             "speaker": "小简",

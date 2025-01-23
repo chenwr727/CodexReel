@@ -1,0 +1,10 @@
+credentials:
+  usernames:
+    admin:
+      email: admin@example.com
+      name: admin
+      password: $2b$12$Q6OgKWVLPW1v8iZXRwV/seecQJmgbbDj3KtQjX3ZW5650TXF2tKXi
+cookie:
+  expiry_days: 30
+  key: bdfgnbgdesnredgedzssderf
+  name: task_management_cookie

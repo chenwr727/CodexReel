@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
 
 ```json
 {
-    "description": "Huawei Gala",
+    "topic": "Huawei Gala",
     "dialogues": [
         {
             "speaker": "Xiaojian",

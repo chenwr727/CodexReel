@@ -6,14 +6,6 @@ import re
 import subprocess
 from typing import List, Tuple
 
-from tqdm import tqdm
-
-from utils.log import logger
-
-os.environ["IMAGEMAGICK_BINARY"] = (
-    r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"
-)
-
 from moviepy import (
     AudioFileClip,
     CompositeVideoClip,
@@ -22,6 +14,9 @@ from moviepy import (
     VideoClip,
     concatenate_videoclips,
 )
+from tqdm import tqdm
+
+from utils.log import logger
 
 
 async def find_split_index(
@@ -146,7 +141,7 @@ async def create_video_from_audio_and_image(
     fps: int,
     offset: int = None,
     direction: int = None,
-    step: int = 1,
+    step: int = 3,
 ) -> Tuple[VideoClip, int, int]:
     original_width = image.size[0]
     original_height = image.size[1]
@@ -242,7 +237,7 @@ async def create_video(
     title_font_size = int(subtitle_width / 16)
     title_position = int(images[0].size[1] / 2)
 
-    title = data["description"]
+    title = data["topic"]
     dialogues = data["dialogues"]
     for i, dialogue in tqdm(
         enumerate(dialogues), desc="Creating video", total=len(dialogues)
@@ -258,6 +253,7 @@ async def create_video(
         direction = None
         duration_start = 0
         for j, text in enumerate(texts):
+            text = text.replace("‘", "“").replace("’", "”").strip()
             image_index = i % len(image_files)
 
             if i == 0 and j == 0:

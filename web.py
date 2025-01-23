@@ -1,16 +1,17 @@
-"""
-streamlit run web.py --server.port 8000
-"""
-
 import datetime
-from datetime import date
+import json
+import os
 
 import pandas as pd
 import plotly.express as px
 import requests
 import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 from utils.config import load_config
+from utils.processing import parse_url
 
 config = load_config()
 
@@ -27,7 +28,7 @@ class TaskAPIClient:
         url = f"{self.base_url}/v1/tasks/{task_id}"
         return requests.get(url)
 
-    def get_task_list(self, task_date: date) -> requests.Response:
+    def get_task_list(self, task_date: datetime.date) -> requests.Response:
         url = f"{self.base_url}/v1/tasks/list/{task_date}"
         return requests.get(url)
 
@@ -41,8 +42,6 @@ class TaskAPIClient:
 
 
 def init_session_state():
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
     if "current_task" not in st.session_state:
         st.session_state.current_task = None
 
@@ -68,20 +67,44 @@ def render_task_status(status: str) -> str:
     return f":{colors.get(status, 'black')}[{status}]"
 
 
+def load_authenticator()-> stauth.Authenticate:
+    with open("auth.yaml") as file:
+        config = yaml.load(file, Loader=SafeLoader)
+
+    authenticator = stauth.Authenticate(
+        credentials=config["credentials"],
+        cookie_name=config["cookie"]["name"],
+        key=config["cookie"]["key"],
+        cookie_expiry_days=config["cookie"]["expiry_days"],
+    )
+
+    return authenticator
+
+
+def handle_authentication(authenticator: stauth.Authenticate) -> bool:
+    try:
+        authenticator.login()
+
+        if st.session_state["authentication_status"] == False:
+            st.error("Username/password is incorrect")
+            return False
+        elif st.session_state["authentication_status"] == None:
+            st.warning("Please enter your username and password")
+            return False
+
+        return True
+
+    except Exception as e:
+        st.error(f"Authentication error: {str(e)}")
+        return False
+
+
 def main():
     st.set_page_config(page_title="Task Management System", layout="wide")
     init_session_state()
 
-    if not st.session_state.authenticated:
-        password = st.text_input(
-            "Please input the passwrd", type="password", placeholder="Enter Password"
-        )
-        if st.button("Login"):
-            if password == ADMIN_PASSWORD:
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Incorrect password!")
+    authenticator = load_authenticator()
+    if not handle_authentication(authenticator):
         return
 
     tab1, tab2, tab3 = st.tabs(["Task List", "Create Task", "Task Details"])
@@ -127,7 +150,7 @@ def main():
     with tab3:
         st.subheader("Task Details")
         task_id = st.text_input("Task ID", value=st.session_state.current_task or "")
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([3, 1])
         with col1:
             if st.button("Check Status"):
                 if task_id:
@@ -138,9 +161,17 @@ def main():
                         st.markdown(
                             f"- **Status**: {render_task_status(task_data['status'])}"
                         )
+
+                        folder, dir_name = parse_url('', int(task_id))
+                        file_json = os.path.join(folder, f"{dir_name}.json")
+                        if os.path.exists(file_json):
+                            expander = st.expander("See dialogue")
+                            with open(file_json, "r", encoding="utf-8") as f:
+                                json_data = json.load(f)
+                                expander.json(json_data)
+
                         st.markdown(f"- **Created Time**: {task_data['create_time']}")
                         if task_data["result"]:
-                            st.markdown("### Task Result")
                             if task_data["status"] == "completed":
                                 st.markdown("### Task Result")
                                 st.video(task_data["result"])
@@ -172,7 +203,6 @@ def main():
 
 base_url = f"http://localhost:{config['api']['app_port']}"
 api_client = TaskAPIClient(base_url)
-ADMIN_PASSWORD = config["web"]["password"]
 
 if __name__ == "__main__":
     main()

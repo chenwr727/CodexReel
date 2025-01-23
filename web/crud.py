@@ -8,8 +8,14 @@ from .schemas import TaskCreate
 
 
 async def create_task(session: Session, task: TaskCreate) -> Task:
-    db_task = Task(name=task.name, status=TaskStatus.PENDING)
-    session.add(db_task)
+    result = await session.execute(select(Task).where(Task.name == task.name))
+    db_task = result.scalars().first()
+    if db_task:
+        db_task.status = TaskStatus.PENDING
+        return db_task
+    else:
+        db_task = Task(name=task.name, status=TaskStatus.PENDING)
+        session.add(db_task)
     await session.commit()
     await session.refresh(db_task)
     return db_task
@@ -30,7 +36,7 @@ async def get_status(session: Session, task_date: str) -> dict[str, int]:
 
 async def get_task_list(session: Session, task_date: str) -> list[Task]:
     result = await session.execute(
-        select(Task).where(Task.create_time.like(f"%{task_date}%"))
+        select(Task).where(Task.update_time.like(f"%{task_date}%"))
     )
     return result.scalars().all()
 

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import dashscope
 from dashscope.audio.tts_v2 import SpeechSynthesizer
@@ -30,19 +31,23 @@ class TextToSpeechConverter:
             if os.path.exists(file_name):
                 file_names.append(file_name)
                 continue
-            try:
-                synthesizer = SpeechSynthesizer(
-                    model=self.model, voice=voice, speech_rate=1.2
-                )
-                audio = synthesizer.call(content)
-                with open(file_name, "wb") as f:
-                    f.write(audio)
-                file_names.append(file_name)
-            except Exception as e:
-                logger.error(f"合成语音时发生错误: {e}")
-                if os.path.exists(file_name):
-                    os.remove(file_name)
-                return None
+            synthesizer = SpeechSynthesizer(
+                model=self.model, voice=voice, speech_rate=1.4
+            )
+            for _ in range(3):
+                try:
+                    audio = synthesizer.call(content)
+                    with open(file_name, "wb") as f:
+                        f.write(audio)
+                    file_names.append(file_name)
+                    break
+                except Exception as e:
+                    logger.error(f"合成语音时发生错误: {e}")
+                    if os.path.exists(file_name):
+                        os.remove(file_name)
+                    time.sleep(3)
+                    continue
+            time.sleep(2)
         return file_names
 
     async def text_to_speech(self, dialogues: list[dict], output_file: str):

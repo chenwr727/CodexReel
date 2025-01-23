@@ -35,7 +35,7 @@ class TaskService:
 
                     try:
                         result = await asyncio.wait_for(
-                            url2video(name),
+                            url2video(name, task_id),
                             timeout=float(settings.TASK_TIMEOUT_SECONDS),
                         )
 

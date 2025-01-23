@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import requests
 from bs4 import BeautifulSoup
@@ -56,5 +57,18 @@ async def get_content(url: str, max_retries: int = 3, retry_delay: int = 2):
     return await parse_response(response)
 
 
-def parse_url(url: str):
-    return url.replace("http://", "").replace("https://", "").replace("/", "_").replace("?", "_")
+def parse_url(url: str, doc_id: int = None, output_folder: str = "output"):
+    if doc_id:
+        dir_name = f"{doc_id:04}"
+    else:
+        dir_name = (
+            url.replace("http://", "")
+            .replace("https://", "")
+            .replace("/", "_")
+            .replace("?", "_")
+        )
+
+    folder = os.path.join(output_folder, dir_name)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder, dir_name

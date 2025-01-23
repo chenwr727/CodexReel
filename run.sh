@@ -52,6 +52,7 @@ stop_services() {
 # Function to restart services
 restart_services() {
     stop_services
+    sleep 1
     start_services
 }
 
