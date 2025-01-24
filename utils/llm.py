@@ -10,7 +10,7 @@ class LLmWriter:
         self.model = model
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
 
-    async def writer(self, content: str, system_prompt: str) -> str:
+    async def writer(self, content: str, system_prompt: str, **kwargs) -> str:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},
@@ -19,6 +19,7 @@ class LLmWriter:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
+                **kwargs,
             )
             if (
                 response.choices
