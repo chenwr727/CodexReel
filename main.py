@@ -45,14 +45,22 @@ async def url2video(url: str, doc_id: int = None):
 
         logger.info("开始生成播客")
         logger.info("初稿生成")
-        text_writer = await assistant.writer(content, config["llm"]["prompt_writer"])
+        text_writer = await assistant.writer(
+            f"文章内容：\n{content}",
+            config["llm"]["prompt_writer"],
+            response_format={"type": "json_object"},
+        )
         logger.info("文案反思")
         text_reflector = await assistant.writer(
-            text_writer, config["llm"]["prompt_reflector"]
+            f"文章内容：\n{content}\n\n初稿文案：\n{text_writer}",
+            config["llm"]["prompt_reflector"],
+            response_format={"type": "json_object"},
         )
         logger.info("文案优化")
         text_rewriter = await assistant.writer(
-            f"初稿文案：\n{text_writer}\n\n反思建议：\n{text_reflector}", config["llm"]["prompt_rewriter"]
+            f"文章内容：\n{content}\n\n初稿文案：\n{text_writer}\n\n反思建议：\n{text_reflector}",
+            config["llm"]["prompt_rewriter"],
+            response_format={"type": "json_object"},
         )
 
         json_pattern = r"(\{.*\s?\})"
