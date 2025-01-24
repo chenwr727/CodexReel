@@ -74,6 +74,7 @@ async def url2video(url: str, doc_id: int = None):
         text_json = json.loads(text_rewriter)
         with open(file_json, "w", encoding="utf-8") as f:
             json.dump(text_json, f, ensure_ascii=False, indent=4)
+        return
     else:
         logger.info("播客文件已存在")
 
@@ -147,4 +148,4 @@ if __name__ == "__main__":
     parser.add_argument("url", type=str, help="The URL of the content to process")
     args = parser.parse_args()
 
-    asyncio.run(url2video(args.url))
+    asyncio.run(url2video("", 18))
