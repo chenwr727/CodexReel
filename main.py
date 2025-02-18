@@ -148,4 +148,4 @@ if __name__ == "__main__":
     parser.add_argument("url", type=str, help="The URL of the content to process")
     args = parser.parse_args()
 
-    asyncio.run(url2video("", 18))
+    asyncio.run(url2video(args.url))

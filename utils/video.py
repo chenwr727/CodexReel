@@ -156,12 +156,16 @@ async def create_video_from_audio_and_image(
     )
     direction = random.choice([1, -1]) if direction is None else direction
     for _ in range(math.ceil(audio.duration * fps)):
-        if offset >= original_width - video_width:
+        if offset >= original_width - video_width - 1:
             direction = -1
         elif offset <= 0:
             direction = 1
 
         offset += direction * step
+        if offset < 0:
+            offset = 0
+        if offset > original_width - video_width:
+            offset = original_width - video_width - 1
         frame = image.cropped(x1=offset, y1=0, x2=offset + video_width, y2=video_height)
         frame = frame.with_duration(1 / fps)
         frames.append(frame)
