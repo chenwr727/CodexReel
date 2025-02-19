@@ -1,5 +1,6 @@
 import os
 from http import HTTPStatus
+from typing import List
 
 import dashscope
 import requests
@@ -13,9 +14,7 @@ class ImageAssistant:
         self.chapter = chapter
         dashscope.api_key = api_key
 
-    async def generate_image(
-        self, prompt: str, model: str, n: int = 2, size: str = "1024*1024"
-    ) -> list[str]:
+    async def generate_image(self, prompt: str, model: str, n: int = 2, size: str = "1024*1024") -> List[str]:
         for i in range(n):
             file_name = os.path.join(self.chapter, f"{i}.png")
             if not os.path.exists(file_name):
@@ -32,8 +31,5 @@ class ImageAssistant:
                     f.write(requests.get(result.url).content)
                 file_names.append(file_name)
         else:
-            logger.error(
-                "Failed, status_code: %s, code: %s, message: %s"
-                % (rsp.status_code, rsp.code, rsp.message)
-            )
+            logger.error("Failed, status_code: %s, code: %s, message: %s" % (rsp.status_code, rsp.code, rsp.message))
         return file_names

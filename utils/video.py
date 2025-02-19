@@ -12,16 +12,17 @@ from moviepy import (
     ImageClip,
     TextClip,
     VideoClip,
+    VideoFileClip,
     concatenate_videoclips,
+    vfx,
 )
 from tqdm import tqdm
 
 from utils.log import logger
+from utils.schema import Dialogue, MaterialInfo, VideoConfig, VideoTranscript
 
 
-async def find_split_index(
-    current_line: str, font: str, fontsize: int, max_width: int
-) -> int:
+async def find_split_index(current_line: str, font: str, fontsize: int, max_width: int) -> int:
     split_index = len(current_line)
     for i in range(len(current_line) - 1, 0, -1):
         temp_clip = TextClip(font, current_line[:i], font_size=fontsize, color="white")
@@ -31,9 +32,7 @@ async def find_split_index(
     return split_index
 
 
-async def wrap_text_by_punctuation_and_width(
-    text: str, max_width: int, font: str, fontsize: int
-) -> str:
+async def wrap_text_by_punctuation_and_width(text: str, max_width: int, font: str, fontsize: int) -> str:
     punctuation = r"[，。！？]"
     english_char = r"[a-zA-Z]"
     words = re.split(f"({punctuation})", text)
@@ -53,9 +52,7 @@ async def wrap_text_by_punctuation_and_width(
             if temp_clip.size[0] <= max_width:
                 break
             else:
-                split_index = await find_split_index(
-                    current_line, font, fontsize, max_width
-                )
+                split_index = await find_split_index(current_line, font, fontsize, max_width)
                 lines.append(current_line[:split_index])
                 current_line = current_line[split_index:]
 
@@ -109,29 +106,26 @@ async def merge_videos(
         "-i",
         background_audio,
         "-filter_complex",
-        "[1:a]volume=0.2[bgm];"
-        "[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "medium",
-        "-c:a",
-        "aac",
+        "[1:a]volume=0.2[v1];[0:a][v1]amerge=inputs=2[a]",
         "-map",
         "0:v",
         "-map",
-        "[aout]",
+        "[a]",
+        "-c:v",
+        "copy",
+        "-c:a",
+        "aac",
         "-shortest",
         output_file,
     ]
 
     try:
         subprocess.run(command, check=True)
-        logger.info(f"视频文件合并成功，输出文件：{output_file}")
+        logger.info(f"Video created successfully.")
     except subprocess.CalledProcessError as e:
-        logger.error(f"FFmpeg 执行失败: {e}")
+        logger.error(f"FFMPEG error: {e}")
     except Exception as e:
-        logger.error(f"未知错误: {e}")
+        logger.error(f"Error creating video: {e}")
 
 
 async def create_video_from_audio_and_image(
@@ -149,11 +143,7 @@ async def create_video_from_audio_and_image(
     video_height = original_height
 
     frames = []
-    offset = (
-        random.randint(0, original_width - video_width - 1)
-        if offset is None
-        else offset
-    )
+    offset = random.randint(0, original_width - video_width - 1) if offset is None else offset
     direction = random.choice([1, -1]) if direction is None else direction
     for _ in range(math.ceil(audio.duration * fps)):
         if offset >= original_width - video_width - 1:
@@ -177,9 +167,9 @@ async def create_video_from_audio_and_image(
     return video, offset, direction
 
 
-async def create_video(
+async def create_video_by_images(
     image_files: List[str],
-    data: dict,
+    data: VideoTranscript,
     folder: str,
     output_file: str,
     opening_audio: str,
@@ -198,9 +188,7 @@ async def create_video(
     ) -> Tuple[int, int, int]:
         audio = AudioFileClip(audio_file)
 
-        text = await wrap_text_by_punctuation_and_width(
-            content, subtitle_width, font, font_size
-        )
+        text = await wrap_text_by_punctuation_and_width(content, subtitle_width, font, font_size)
         txt_clip = TextClip(
             font,
             text,
@@ -241,16 +229,14 @@ async def create_video(
     title_font_size = int(subtitle_width / 16)
     title_position = int(images[0].size[1] / 2)
 
-    title = data["topic"]
-    dialogues = data["dialogues"]
-    for i, dialogue in tqdm(
-        enumerate(dialogues), desc="Creating video", total=len(dialogues)
-    ):
+    title = data.topic
+    dialogues = data.dialogues
+    for i, dialogue in tqdm(enumerate(dialogues), desc="Creating video", total=len(dialogues)):
         video_file = os.path.join(folder, f"{i}.mp4")
         if os.path.exists(video_file):
             continue
 
-        texts = dialogue["contents"]
+        texts = dialogue.contents
         videos = []
         txt_clips = []
         offset = None
@@ -299,6 +285,91 @@ async def create_video(
     video_files = [f"{i}.mp4" for i in range(len(dialogues))]
     list_file = os.path.join(folder, "listfile.txt")
     await merge_videos(video_files, output_file, list_file, background_audio)
+
+    gc.collect()
+
+    return None
+
+
+async def create_video_by_videos(
+    videos: List[MaterialInfo],
+    dialogues: List[Dialogue],
+    folder: str,
+    output_file: str,
+    video_config: VideoConfig,
+) -> VideoClip:
+    subtitle_width = int(video_config.width * 0.8)
+    font_size = int(subtitle_width / 16)
+    subtitle_position = int(video_config.height * 2 / 3)
+
+    for i, dialogue in tqdm(enumerate(dialogues), desc="Creating video", total=len(dialogues)):
+        video_file = os.path.join(folder, f"{i}.mp4")
+        if os.path.exists(video_file):
+            continue
+
+        texts = dialogue.contents
+        video = VideoFileClip(videos[i].video_path).without_audio()
+        if video.size[0] != video_config.width:
+            video = video.resized((video_config.width, video_config.height))
+        final_videos = []
+        txt_clips = []
+        duration_start = 0
+
+        for j, text in enumerate(texts):
+            text = text.replace("‘", "“").replace("’", "”").strip()
+
+            audio_file = os.path.join(folder, f"{i}_{j}.mp3")
+            audio = AudioFileClip(audio_file)
+
+            text = await wrap_text_by_punctuation_and_width(text, subtitle_width, video_config.font, font_size)
+            txt_clip = TextClip(
+                video_config.font,
+                text,
+                font_size=font_size,
+                color="white",
+                stroke_color="black",
+                stroke_width=1,
+                text_align="center",
+            )
+            txt_clip = txt_clip.with_position(("center", subtitle_position - txt_clip.size[1] // 2))
+
+            video_sub = video.subclipped(duration_start, duration_start + audio.duration)
+            video_sub = video_sub.with_audio(audio).with_start(duration_start)
+            txt_clip = txt_clip.with_duration(audio.duration).with_start(duration_start)
+
+            if i > 0 and j == 0:
+                shuffle_side = random.choice(["left", "right", "top", "bottom"])
+                transition_funcs = [
+                    lambda c: c.with_effects([vfx.CrossFadeIn(0.5)]),
+                    lambda c: c.with_effects([vfx.SlideIn(0.5, shuffle_side)]),
+                ]
+                shuffle_transition = random.choice(transition_funcs)
+                video_sub = shuffle_transition(video_sub)
+
+            final_videos.append(video_sub)
+            txt_clips.append(txt_clip)
+            duration_start += audio.duration
+
+        final_video = CompositeVideoClip(final_videos + txt_clips)
+
+        try:
+            final_video.write_videofile(video_file, codec="libx264", fps=video_config.fps, threads=4)
+        except Exception as e:
+            logger.error(f"Error writing video file: {e}")
+            if os.path.exists(video_file):
+                os.remove(video_file)
+
+        del audio
+        del video
+        del final_videos
+        del txt_clips
+        del final_video
+
+        gc.collect()
+
+    video_files = [f"{i}.mp4" for i in range(len(dialogues))]
+    list_file = os.path.join(folder, "listfile.txt")
+    await merge_videos(video_files, output_file, list_file, video_config.background_audio)
 
     gc.collect()
 

@@ -11,7 +11,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 from utils.config import load_config
-from utils.processing import parse_url
+from utils.url import parse_url
 
 config = load_config()
 
