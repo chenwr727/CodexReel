@@ -55,7 +55,7 @@ class VideoGenerator:
         else:
             content = url
 
-        self._write_file(files.txt, content)
+        self._write_file(files.html, content)
         return content
 
     async def _generate_draft(self, content: str, files: ProcessingFiles) -> Optional[str]:
