@@ -3,8 +3,10 @@ import asyncio
 import json
 import os
 import re
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
-from utils import config
+from utils.config import config
 from utils.llm import LLmWriter
 from utils.log import logger
 from utils.pexels import PexelsHelper
@@ -14,143 +16,243 @@ from utils.url import get_content, parse_url
 from utils.video import create_video_by_videos
 
 
-async def url2video(url: str, doc_id: int = None):
-    logger.info(f"Start {url}")
-    folder, dir_name = parse_url(url, doc_id)
+@dataclass
+class ProcessingFiles:
+    """Class to manage file paths for video processing."""
 
-    file_json = os.path.join(folder, f"{dir_name}.json")
-    file_txt = os.path.join(folder, f"{dir_name}.txt")
-    assistant = LLmWriter(config.llm.api_key, config.llm.base_url, config.llm.model)
+    folder: str
 
-    if not os.path.exists(file_json):
-        if not os.path.exists(file_txt):
-            if url.startswith("http"):
-                logger.info("Starting to fetch content from URL")
-                text = await get_content(url)
-                if not text:
-                    logger.error("Failed to fetch content from URL")
-                    return
-            else:
-                text = url
-            with open(file_txt, "w", encoding="utf-8") as f:
-                f.write(text)
+    def __post_init__(self):
+        """Initialize all file paths after instance creation."""
+        self.script = os.path.join(self.folder, f"_script.json")
+        self.html = os.path.join(self.folder, f"_html.txt")
+        self.draft = os.path.join(self.folder, "_draft.txt")
+        self.reflected = os.path.join(self.folder, "_reflected.txt")
+        self.durations = os.path.join(self.folder, "_durations.json")
+        self.videos = os.path.join(self.folder, "_videos.json")
+        self.terms = os.path.join(self.folder, "_terms.json")
+        self.output = os.path.join(self.folder, f"_output.mp4")
+
+
+class VideoGenerator:
+    def __init__(self):
+        self.config = config
+        self.assistant = LLmWriter(config.llm.api_key, config.llm.base_url, config.llm.model)
+
+    async def _get_content_from_source(self, url: str, files: ProcessingFiles) -> Optional[str]:
+        """Fetch or read content from URL or direct text."""
+        logger.info("Starting to fetch content")
+        if os.path.exists(files.html):
+            logger.info("Content file already exists, reading from file")
+            return self._read_file(files.html)
+
+        if url.startswith("http"):
+            logger.info("Starting to fetch content from URL")
+            content = await get_content(url)
+            if not content:
+                logger.error("Failed to fetch content from URL")
+                return None
         else:
-            logger.info("File already exists.")
+            content = url
 
-        with open(file_txt, "r", encoding="utf-8") as f:
-            content = f.read()
+        self._write_file(files.txt, content)
+        return content
 
-        logger.info("Start to generate video transcript")
-        logger.info("Generating first draft...")
-        text_writer = await assistant.writer(
-            f"文章内容：\n{content}",
-            config.llm.prompt_writer,
+    async def _generate_draft(self, content: str, files: ProcessingFiles) -> Optional[str]:
+        """Generate first draft of the video transcript."""
+        logger.info("Starting to generate draft")
+        if os.path.exists(files.draft):
+            logger.info("Draft file already exists")
+            return self._read_file(files.draft)
+
+        text_writer = await self.assistant.writer(
+            f"文章内容：\n{content}", self.config.llm.prompt_writer, response_format={"type": "json_object"}
+        )
+        if text_writer:
+            self._write_file(files.draft, text_writer)
+            return text_writer
+        return None
+
+    async def _generate_reflection(self, content: str, draft: str, files: ProcessingFiles) -> Optional[str]:
+        """Generate reflection on the draft."""
+        logger.info("Starting to generate reflection")
+        if os.path.exists(files.reflected):
+            logger.info("Reflection file already exists")
+            return self._read_file(files.reflected)
+
+        text_reflector = await self.assistant.writer(
+            f"文章内容：\n{content}\n\n初稿文案：\n{draft}",
+            self.config.llm.prompt_reflector,
             response_format={"type": "json_object"},
         )
-        if text_writer is None:
-            logger.error("Failed to generate first draft.")
-            return None
-        logger.info("Reflecting...")
-        text_reflector = await assistant.writer(
-            f"文章内容：\n{content}\n\n初稿文案：\n{text_writer}",
-            config.llm.prompt_reflector,
+        if text_reflector:
+            self._write_file(files.reflected, text_reflector)
+            return text_reflector
+        return None
+
+    async def _generate_final_transcript(self, content: str, draft: str, reflection: str) -> Optional[Dict[str, Any]]:
+        """Generate final video transcript."""
+        logger.info("Starting to generate final transcript")
+        text_rewriter = await self.assistant.writer(
+            f"文章内容：\n{content}\n\n初稿文案：\n{draft}\n\n反思建议：\n{reflection}",
+            self.config.llm.prompt_rewriter,
             response_format={"type": "json_object"},
         )
-        if text_reflector is None:
-            logger.error("Reflector failed")
-            return None
-        logger.info("Optimizing...")
-        text_rewriter = await assistant.writer(
-            f"文章内容：\n{content}\n\n初稿文案：\n{text_writer}\n\n反思建议：\n{text_reflector}",
-            config.llm.prompt_rewriter,
-            response_format={"type": "json_object"},
-        )
-        if text_rewriter is None:
-            logger.error("Rewriter failed")
+        if not text_rewriter:
             return None
 
-        json_pattern = r"(\{.*\s?\})"
-        matches = re.findall(json_pattern, text_rewriter, flags=re.DOTALL)
-        if matches:
-            text_rewriter = matches[0]
-        else:
-            logger.error("Error: No JSON object found in the response.")
-            return
+        json_match = re.search(r"(\{.*\s?\})", text_rewriter, re.DOTALL)
+        if not json_match:
+            logger.error("No JSON object found in response")
+            return None
 
-        text_json = json.loads(text_rewriter)
-        with open(file_json, "w", encoding="utf-8") as f:
-            json.dump(text_json, f, ensure_ascii=False, indent=4)
-        return
-    else:
-        logger.info("File already exists.")
+        return json.loads(json_match.group(1))
 
-    with open(file_json, "r", encoding="utf-8") as f:
-        text_json = json.load(f)
-    video_transcript = VideoTranscript.model_validate(text_json)
+    async def _process_audio(self, video_transcript: VideoTranscript, files: ProcessingFiles) -> List[float]:
+        """Process audio for the video."""
+        logger.info("Starting to process audio")
+        if os.path.exists(files.durations):
+            return json.loads(self._read_file(files.durations))
 
-    logger.info("Start to generate audios...")
-    file_durations = os.path.join(folder, "durations.json")
-    durations = []
-    if os.path.exists(file_durations):
-        with open(file_durations, "r", encoding="utf-8") as f:
-            durations = json.load(f)
-    if not durations:
         converter = TextToSpeechConverter(
-            config.tts.api_key,
-            config.tts.model,
-            config.tts.voices,
-            folder,
+            self.config.tts.api_key,
+            self.config.tts.model,
+            self.config.tts.voices,
+            files.folder,
         )
         durations = await converter.text_to_speech(video_transcript.dialogues)
-        with open(file_durations, "w", encoding="utf-8") as f:
-            json.dump(durations, f, ensure_ascii=False)
+        self._write_json(files.durations, durations)
+        return durations
 
-    logger.info("Start to download videos...")
-    videos = []
-    file_videos = os.path.join(folder, "videos.json")
-    if os.path.exists(file_videos):
-        with open(file_videos, "r", encoding="utf-8") as f:
-            videos = json.load(f)
-    if not videos:
-        search_terms = []
-        file_terms = os.path.join(folder, "terms.json")
-        if os.path.exists(file_terms):
-            with open(file_terms, "r", encoding="utf-8") as f:
-                search_terms = json.load(f)
-        if not search_terms:
-            content = await assistant.writer(
-                video_transcript.model_dump_json(),
-                config.pexels.prompt,
-                response_format={"type": "json_object"},
-            )
-            json_pattern = r"(\[.*\s?\])"
-            matches = re.findall(json_pattern, content, flags=re.DOTALL)
-            if not matches:
-                logger.error("Error parsing JSON: No valid JSON found in the response.")
-                return
-            search_terms = json.loads(matches[0])
-            with open(file_terms, "w", encoding="utf-8") as f:
-                json.dump(search_terms, f, ensure_ascii=False)
+    async def _process_videos(
+        self, video_transcript: VideoTranscript, durations: List[float], files: ProcessingFiles
+    ) -> List[Dict[str, Any]]:
+        """Process videos for the final output."""
+        logger.info("Starting to process videos")
+        if os.path.exists(files.videos):
+            return json.loads(self._read_file(files.videos))
+
+        search_terms = await self._get_search_terms(video_transcript, files)
         pexels_helper = PexelsHelper(
-            config.pexels.api_key, config.video.width, config.video.height, config.pexels.minimum_duration
+            self.config.pexels.api_key,
+            self.config.video.width,
+            self.config.video.height,
+            self.config.pexels.minimum_duration,
         )
         videos = pexels_helper.get_videos(durations, search_terms)
-        with open(file_videos, "w", encoding="utf-8") as f:
-            json.dump([video.model_dump() for video in videos], f, ensure_ascii=False, indent=4)
+        self._write_json(files.videos, [video.model_dump() for video in videos])
+        return videos
 
-    logger.info("Start Creating Video")
-    output_file = os.path.join(folder, f"{dir_name}.mp4")
-    if not os.path.exists(output_file):
-        await create_video_by_videos(videos, video_transcript.dialogues, folder, output_file, config.video)
+    async def _get_search_terms(self, video_transcript: VideoTranscript, files: ProcessingFiles) -> List[str]:
+        """Get search terms for video content."""
+        logger.info("Starting to get search terms")
+        if os.path.exists(files.terms):
+            return json.loads(self._read_file(files.terms))
+
+        content = await self.assistant.writer(
+            video_transcript.model_dump_json(), self.config.pexels.prompt, response_format={"type": "json_object"}
+        )
+        json_match = re.search(r"(\[.*\s?\])", content, re.DOTALL)
+        if not json_match:
+            raise ValueError("No valid JSON found in search terms response")
+
+        search_terms = json.loads(json_match.group(1))
+        self._write_json(files.terms, search_terms)
+        return search_terms
+
+    @staticmethod
+    def _read_file(filepath: str) -> str:
+        """Read content from a file."""
+        with open(filepath, "r", encoding="utf-8") as f:
+            return f.read()
+
+    @staticmethod
+    def _write_file(filepath: str, content: str) -> None:
+        """Write content to a file."""
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    @staticmethod
+    def _write_json(filepath: str, content: Any) -> None:
+        """Write JSON content to a file."""
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(content, f, ensure_ascii=False, indent=4)
+
+    async def generate_video(self, url: str, doc_id: Optional[int] = None) -> Optional[str]:
+        """Main method to generate video from URL or text content."""
+        try:
+            logger.info(f"Starting video generation for {url}")
+            folder = parse_url(url, doc_id)
+            files = ProcessingFiles(folder)
+
+            # Early return if output already exists
+            if os.path.exists(files.output):
+                logger.info("Output video already exists")
+                return files.output
+
+            # Process content and generate transcript
+            if not os.path.exists(files.script):
+                content = await self._get_content_from_source(url, files)
+                if not content:
+                    raise ValueError("Failed to fetch content from source")
+
+                draft = await self._generate_draft(content, files)
+                if not draft:
+                    raise ValueError("Failed to generate draft")
+
+                reflection = await self._generate_reflection(content, draft, files)
+                if not reflection:
+                    raise ValueError("Failed to generate reflection")
+
+                final_transcript = await self._generate_final_transcript(content, draft, reflection)
+                if not final_transcript:
+                    raise ValueError("Failed to generate final transcript")
+
+                self._write_json(files.script, final_transcript)
+                logger.info("Video script generation completed")
+                return "Script"
+
+            # Load transcript and process
+            transcript_data = json.loads(self._read_file(files.script))
+            video_transcript = VideoTranscript.model_validate(transcript_data)
+
+            # Generate audio and video
+            durations = await self._process_audio(video_transcript, files)
+            videos = await self._process_videos(video_transcript, durations, files)
+
+            # Create final video
+            await create_video_by_videos(
+                videos, video_transcript.dialogues, files.folder, files.output, self.config.video
+            )
+
+            return files.output if os.path.exists(files.output) else None
+
+        except Exception as e:
+            logger.error(f"Error in video generation: {str(e)}")
+            return None
+
+
+async def url2video(url: str, doc_id: Optional[int] = None) -> Optional[str]:
+    generator = VideoGenerator()
+    return await generator.generate_video(url, doc_id)
+
+
+async def main():
+    parser = argparse.ArgumentParser(description="Process and convert text to speech from a given URL.")
+    parser.add_argument("url", type=str, help="The URL of the content to process")
+    parser.add_argument("--doc-id", type=int, help="Optional document ID", default=None)
+    args = parser.parse_args()
+
+    result = await url2video(args.url, args.doc_id)
+
+    if result:
+        if result == "Script":
+            logger.info("Script generation completed")
+        else:
+            logger.info("Video generation completed")
     else:
-        logger.info("File already exists.")
-    if os.path.exists(output_file):
-        return output_file
+        logger.error("Failed to generate video")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process and convert text to speech from a given URL.")
-    parser.add_argument("url", type=str, help="The URL of the content to process")
-    args = parser.parse_args()
-
-    asyncio.run(url2video(args.url))
+    asyncio.run(main())

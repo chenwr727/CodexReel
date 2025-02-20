@@ -51,7 +51,7 @@ class TextToSpeechConverter:
     async def text_to_speech(self, dialogues: List[Dialogue]):
         durations = []
 
-        for i, dialogue in tqdm(enumerate(dialogues), desc="生成语音", total=len(dialogues)):
+        for i, dialogue in tqdm(enumerate(dialogues), desc="Create Audio", total=len(dialogues)):
             duration = await self.process_dialogue(i, dialogue)
             if duration:
                 durations.append(duration)

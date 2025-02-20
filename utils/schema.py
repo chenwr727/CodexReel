@@ -55,6 +55,16 @@ class PexelsConfig(BaseModel):
     prompt: str
 
 
+class Config(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    llm: LLMConfig
+    tts: TTSConfig
+    tti: TTIConfig
+    video: VideoConfig
+    api: ApiConfig
+    pexels: PexelsConfig
+
+
 class Dialogue(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     speaker: str

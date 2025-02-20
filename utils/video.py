@@ -342,6 +342,7 @@ async def create_video_by_videos(
                 transition_funcs = [
                     lambda c: c.with_effects([vfx.CrossFadeIn(0.5)]),
                     lambda c: c.with_effects([vfx.SlideIn(0.5, shuffle_side)]),
+                    lambda c: c,
                 ]
                 shuffle_transition = random.choice(transition_funcs)
                 video_sub = shuffle_transition(video_sub)

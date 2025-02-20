@@ -53,4 +53,4 @@ def parse_url(url: str, doc_id: int = None, output_folder: str = "output"):
     folder = os.path.join(output_folder, dir_name)
     if not os.path.exists(folder):
         os.makedirs(folder)
-    return folder, dir_name
+    return folder

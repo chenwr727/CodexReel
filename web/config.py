@@ -1,4 +1,4 @@
-from utils import config
+from utils.config import config
 
 
 class Settings:
