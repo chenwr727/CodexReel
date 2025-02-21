@@ -10,10 +10,8 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
-from utils.config import load_config
-from utils.processing import parse_url
-
-config = load_config()
+from utils.config import config
+from utils.url import parse_url
 
 
 class TaskAPIClient:
@@ -50,9 +48,7 @@ def format_task_data(tasks: list) -> pd.DataFrame:
     if not tasks:
         return pd.DataFrame()
     df = pd.DataFrame(tasks)
-    df["create_time"] = pd.to_datetime(df["create_time"]).dt.strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    df["create_time"] = pd.to_datetime(df["create_time"]).dt.strftime("%Y-%m-%d %H:%M:%S")
     return df
 
 
@@ -67,7 +63,7 @@ def render_task_status(status: str) -> str:
     return f":{colors.get(status, 'black')}[{status}]"
 
 
-def load_authenticator()-> stauth.Authenticate:
+def load_authenticator() -> stauth.Authenticate:
     with open("auth.yaml") as file:
         config = yaml.load(file, Loader=SafeLoader)
 
@@ -158,12 +154,10 @@ def main():
                     if response.status_code == 200:
                         task_data = response.json()
                         st.markdown("### Task Information")
-                        st.markdown(
-                            f"- **Status**: {render_task_status(task_data['status'])}"
-                        )
+                        st.markdown(f"- **Status**: {render_task_status(task_data['status'])}")
 
-                        folder, dir_name = parse_url('', int(task_id))
-                        file_json = os.path.join(folder, f"{dir_name}.json")
+                        folder = parse_url("", int(task_id))
+                        file_json = os.path.join(folder, "_script.json")
                         if os.path.exists(file_json):
                             expander = st.expander("See dialogue")
                             with open(file_json, "r", encoding="utf-8") as f:
@@ -174,14 +168,15 @@ def main():
                         if task_data["result"]:
                             if task_data["status"] == "completed":
                                 st.markdown("### Task Result")
-                                st.video(task_data["result"])
-                                with open(task_data["result"], "rb") as f:
-                                    st.download_button(
-                                        label="Download Video",
-                                        data=f,
-                                        file_name=f"{task_data['id']}.mp4",
-                                        mime="video/mp4",
-                                    )
+                                if os.path.exists(task_data["result"]):
+                                    st.video(task_data["result"])
+                                    with open(task_data["result"], "rb") as f:
+                                        st.download_button(
+                                            label="Download Video",
+                                            data=f,
+                                            file_name=f"{task_data['id']}.mp4",
+                                            mime="video/mp4",
+                                        )
                             else:
                                 st.markdown(f"```{task_data['result']}```")
                     else:
@@ -201,7 +196,7 @@ def main():
                     st.warning("Please enter a Task ID")
 
 
-base_url = f"http://localhost:{config['api']['app_port']}"
+base_url = f"http://localhost:{config.api.app_port}"
 api_client = TaskAPIClient(base_url)
 
 if __name__ == "__main__":

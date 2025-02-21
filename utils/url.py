@@ -3,54 +3,40 @@ import os
 
 import requests
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 
 from utils.log import logger
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-
 
 async def fetch_url(url: str, max_retries: int = 5, retry_delay: int = 3):
-    """
-    尝试获取URL内容，支持重试机制。
-    """
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.get(
-                url,
-                headers={"User-Agent": USER_AGENT},
-                timeout=10,
-            )
+            response = requests.get(url, headers={"User-Agent": UserAgent().random}, timeout=10)
             response.raise_for_status()
             return response
         except requests.ConnectionError as ce:
-            logger.error(f"连接错误: {ce}")
+            logger.error(f"ConnectionError: {ce}")
         except requests.Timeout as te:
-            logger.error(f"请求超时: {te}")
+            logger.error(f"Timeout: {te}")
         except requests.RequestException as e:
-            logger.error(f"请求出错: {e}")
+            logger.error(f"Error: {e}")
             return None
         retries += 1
         if retries < max_retries:
-            logger.warning(f"尝试重新连接 ({retries}/{max_retries})...")
+            logger.warning(f"Request failed. Retrying ({retries}/{max_retries})...")
             await asyncio.sleep(retry_delay)
-    logger.error("达到最大重试次数，请求失败。")
+    logger.error("Maximum retries reached.")
     return None
 
 
 async def parse_response(response: requests.Response):
-    """
-    解析响应内容，提取标题和内容。
-    """
     soup = BeautifulSoup(response.content, "html.parser")
     content = soup.get_text().strip()
     return content
 
 
 async def get_content(url: str, max_retries: int = 3, retry_delay: int = 2):
-    """
-    获取并解析URL内容。
-    """
     response = await fetch_url(url, max_retries, retry_delay)
     if response is None:
         return ""
@@ -61,14 +47,9 @@ def parse_url(url: str, doc_id: int = None, output_folder: str = "output"):
     if doc_id:
         dir_name = f"{doc_id:04}"
     else:
-        dir_name = (
-            url.replace("http://", "")
-            .replace("https://", "")
-            .replace("/", "_")
-            .replace("?", "_")
-        )
+        dir_name = url.replace("http://", "").replace("https://", "").replace("/", "_").replace("?", "_")
 
     folder = os.path.join(output_folder, dir_name)
     if not os.path.exists(folder):
         os.makedirs(folder)
-    return folder, dir_name
+    return folder

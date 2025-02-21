@@ -155,4 +155,5 @@ cython_debug/
 log/
 config.toml
 output/
+cache_videos/
 *.db

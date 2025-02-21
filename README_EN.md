@@ -1,315 +1,162 @@
-# URL2VideoStudio
+# URL2VideoStudio 🎬
 
-URL2VideoStudio is an automated video generation project inspired by NotebookLlama. It retrieves content from a specified URL, generates a podcast script, synthesizes speech, creates images, and ultimately produces a video.
+> Transform articles into engaging video content with one click!
 
-#### Demo
+## 📖 Introduction
 
-[Huawei Mate Brand Gala Summary: Mate 70, Mate X6, Pure HarmonyOS, Zunjie S800...](https://www.ithome.com/0/813/427.htm)
+URL2VideoStudio is an innovative automated video generation tool that intelligently transforms any article into engaging dialogue videos. Inspired by NotebookLlama, this project leverages advanced AI technology to achieve fully automated text-to-video production.
 
-https://github.com/user-attachments/assets/b9ce609d-5171-4c20-b281-d7a740e99c70
+### ✨ Key Features
 
-```json
-{
-    "topic": "Huawei Gala",
-    "dialogues": [
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Everyone, today we're going to talk about Huawei's latest gadgets.",
-                "The Mate 70 series is truly 'the most powerful' phone!",
-                "This name isn't just for show."
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "Most powerful?",
-                "That sounds impressive,",
-                "it feels like a superhero among phones!",
-                "If this phone went out with me,",
-                "I'd give it a superhero cape!"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Do you think it needs a cape?",
-                "It already has fancy names like 'Jin Si Jin Xian' and 'Dong Fang Jin Se',",
-                "going out with you,",
-                "it would be renamed to 'Jin Yi Wei'!"
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "Haha, I was also thinking about the screen,",
-                "it supports dynamic refresh rates from 1-120Hz!",
-                "Do you think my Laochen could speak faster than my wife with this?",
-                "She's quite fast!"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "That's hard to say,",
-                "if she speaks with intent, 120Hz won't catch up,",
-                "and besides, your right hand is too slow!",
-                "But the Mate 70's camera is really good,",
-                "50 million pixel zoom,",
-                "capturing distant scenery is 'cross-generational'."
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "I heard the Mate 70 can also do satellite messaging?",
-                "That's so cool,",
-                "you could even chat with aliens!",
-                "I could ask them,",
-                "'What's your phone brand?'"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Haha, aliens would probably tell you,",
-                "they call it 'Galaxy Phone',",
-                "supports cosmic network,",
-                "signal is stronger than your data plan!"
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "Talking about data plans, I thought of the 'Zunjie S800'!",
-                "It starts faster than a plane,",
-                "0-100 km/h in 3.3 seconds,",
-                "could I fly to Beijing for coffee?"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Of course you could!",
-                "If the new nanny didn't keep up, sitting in the car and saying,",
-                "'I checked, it's snowing today,'",
-                "you could tell her,",
-                "'No problem, I'm a high-speed pass!'"
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "High-speed pass!",
-                "Jump on top and activate 'Autopilot Mode',",
-                "that's the feeling of soul out of body."
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Exactly! Did you know,",
-                "there's also a watch released this time,",
-                "priced at 23,999 RMB, even with gold inlaid.",
-                "If I wear this watch,",
-                "could people think I'm carrying a God of Wealth?"
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "God of Wealth!",
-                "Maybe I should get one too,",
-                "see which grandma in the neighborhood notices me first.",
-                "I'm the 'Noble Master'?"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Haha, hope you don't lose your reading glasses,",
-                "otherwise you might end up putting a screen protector on it,",
-                "and it becomes a brick,",
-                "blocking the sun!"
-            ]
-        },
-        {
-            "speaker": "Laochen",
-            "contents": [
-                "Good point!",
-                "This Huawei Gala is like a grand play,",
-                "combining high-tech and luxury,",
-                "but ultimately,",
-                "we need to live life with heart,",
-                "to make life shine!"
-            ]
-        },
-        {
-            "speaker": "Xiaojian",
-            "contents": [
-                "Exactly!",
-                "No matter how advanced the technology,",
-                "the joy in life is created by us!",
-                "Hope everyone can shine like Huawei's new products,",
-                "emitting the brightest light!",
-                "Thank you all!"
-            ]
-        }
-    ]
-}
+- 🤖 **Smart Content Understanding** - Automatically extract and comprehend article essence
+- 🎭 **Multi-Role Dialogue** - AI-driven dialogue generation for engaging content
+- 🔍 **Intelligent Media Matching** - Semantic-based video material matching
+- 🗣️ **AI Voice Synthesis** - Natural and fluid multi-character voiceovers
+- 🎥 **Professional Video Production** - Automated editing and composition
+
+### 🎯 Use Cases
+
+- 📰 News Visualization - Quick conversion of news into short videos
+- 📚 Article Visualization - Make content more expressive
+- 🎤 Podcast Creation - Automated dialogue-style podcasts
+- 📱 Short Video Production - Batch production of quality short videos
+- 🎮 Gaming Content - Video transformation of game guides and news
+
+## 🛠️ Tech Stack
+
+- **Backend**: FastAPI
+- **Frontend**: Streamlit
+- **AI Service**: OpenAI GPT API
+- **Voice Synthesis**: Tongyi TTS
+- **Video Processing**: FFmpeg
+- **Data Storage**: SQLite
+
+## 🚀 Quick Start
+
+### Requirements
+
+- Python 3.10+
+- FFmpeg
+- ImageMagick
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/chenwr727/URL2VideoStudio.git
+cd URL2VideoStudio
 ```
 
-## Table of Contents
-
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Project](#running-the-project)
-- [Project Features](#project-features)
-- [Directory Structure](#directory-structure)
-- [Examples](#examples)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Project Structure
-
+2. Create and activate conda environment:
+```bash
+conda create -n url2video python=3.10
+conda activate url2video
 ```
-.
-├── app.py
-├── config-template.toml
-├── config.toml
-├── main.py
-├── requirements.txt
-├── run.sh
-├── utils/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── image.py
-│   ├── llm.py
-│   ├── log.py
-│   ├── processing.py
-│   ├── tts.py
-│   └── video.py
-└── web/
-    ├── __init__.py
-    ├── config.py
-    ├── crud.py
-    ├── database.py
-    ├── models.py
-    ├── schemas.py
-    ├── service.py
-    └── web.py
-```
-
-## Installation
-
-1. Clone the repository to your local machine:
-
-   ```sh
-   git clone https://github.com/chenwr727/URL2VideoStudio.git
-   cd URL2VideoStudio
-   ```
-
-2. Create and activate a virtual environment:
-
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # For Windows, use `venv\Scripts\activate`
-   ```
 
 3. Install dependencies:
+```bash
+pip install -r requirements.txt
+conda install -c conda-forge ffmpeg
+```
 
-   ```sh
-   pip install -r requirements.txt
-   ```
+### Configuration
 
-## Configuration
+1. Copy configuration template:
+```bash
+copy config-template.toml config.toml
+```
 
-1. Copy `config-template.toml` and rename it to `config.toml`:
+2. Edit `config.toml` with required parameters:
+- OpenAI API Key
+- Tongyi TTS Service Key
+- Pexels API Key
+- Other optional settings
 
-   ```sh
-   cp config-template.toml config.toml
-   ```
+## 📂 Project Structure
 
-2. Edit the `config.toml` file to fill in the appropriate API keys and configurations.
+```
+URL2VideoStudio/
+├── api/                    # API interface module
+│   ├── crud.py            # Database operations
+│   ├── database.py        # Database configuration
+│   ├── models.py          # Data models
+│   ├── router.py          # Route definitions
+│   └── service.py         # Business logic
+├── schemas/               # Data model definitions
+│   ├── config.py         # Configuration models
+│   ├── task.py           # Task models
+│   └── video.py          # Video models
+├── services/             # External service integration
+│   ├── llm.py           # LLM service
+│   ├── pexels.py        # Video material service
+│   ├── tts.py           # Voice synthesis service
+│   └── video.py         # Video processing service
+├── utils/                # Utility modules
+│   ├── config.py        # Configuration management
+│   ├── log.py           # Logging tools
+│   ├── subtitle.py      # Subtitle processing
+│   ├── text.py          # Text processing
+│   └── video.py         # Video utilities
+└── web.py               # Web interface entry
+```
 
-## Running the Project
+## 🖥️ Usage
 
-### Start Services
+### Web Interface
 
-1. Start the FastAPI application:
+1. Start the API service:
+```bash
+python app.py
+```
 
-   ```sh
-   python app.py
-   ```
+2. Launch the web interface:
+```bash
+streamlit run web.py --server.port 8000
+```
 
-2. Start the Streamlit application:
+### Command Line
 
-   ```sh
-   streamlit run web.py --server.port 8000
-   ```
-
-### Use Scripts
-
-1. Run the `main.py` script to process a specified URL:
-
-   ```sh
-   python main.py <url>
-   ```
-
-### Use Shell Script
-
-1. Manage services using the `run.sh` script:
-
-   ```sh
-   # Start services
-   ./run.sh start
-
-   # Stop services
-   ./run.sh stop
-
-   # Restart services
-   ./run.sh restart
-   ```
-
-## Project Features
-
-- Retrieve and parse content from a specified URL.
-- Generate a podcast script using LLM (Language Model).
-- Synthesize speech and generate audio files.
-- Create images.
-- Assemble and generate the final video file.
-- Provide APIs based on FastAPI and a Web interface based on Streamlit.
-
-## Directory Structure
-
-- `app.py`: Entry point for the FastAPI application.
-- `main.py`: Main script that processes URLs and generates videos.
-- `utils/`: Utility modules including configuration loading, logging, image generation, LLM processing, speech synthesis, and video processing.
-- `web/`: Web-related modules including database, models, CRUD operations, and services.
-- `web.py`: Entry point for the Streamlit application.
-- `run.sh`: Shell script to manage services.
-- `config-template.toml`: Configuration template file.
-- `requirements.txt`: List of project dependencies.
-
-## Examples
-
-Here is an example command to process a specified URL and generate a video:
-
-```sh
+Process a single URL:
+```bash
 python main.py https://example.com/article
 ```
 
-## Contributing
+## 📝 Examples
 
-We welcome contributions! Please submit Pull Requests or report issues. Steps to contribute:
+> Note: The following demo videos are edited and compressed for preview purposes only. You can generate complete videos by clicking on the titles to access the original articles.
 
-1. Fork this repository.
-2. Create a new branch (`git checkout -b feature/new-feature`).
-3. Commit changes (`git commit -am 'Add some feature'`).
-4. Push to the new branch (`git push origin feature/new-feature`).
-5. Submit a Pull Request.
+<table>
+    <thead>
+        <tr>
+            <th align="center"><g-emoji class="g-emoji" alias="arrow_forward">▶️</g-emoji> <a href="https://mp.weixin.qq.com/s/31AxWlPevYdI_CLErHReEQ">Europe: The Awkwardness of Being Seated at the Kids' Table</a></th>
+            <th align="center"><g-emoji class="g-emoji" alias="arrow_forward">▶️</g-emoji> <a href="https://mp.weixin.qq.com/s/tQMKS6HBH5bFVwa7otJaww">How Does the Northeast Tycoon Maintain IP Heat with Nezha?</a></th>
+            <th align="center"><g-emoji class="g-emoji" alias="arrow_forward">▶️</g-emoji> <a href="https://m.ithome.com/html/831514.htm">Non-invasive Blood Glucose Monitor: Technology Makes Life Easier</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><video src="https://github.com/user-attachments/assets/452561f5-acb5-4225-9e8b-eb080f8b0a7d"></video></td>
+            <td align="center"><video src="https://github.com/user-attachments/assets/a28b6e03-3685-4014-a856-6a57adb86be1"></video></td>
+            <td align="center"><video src="https://github.com/user-attachments/assets/e5dab72d-041c-436e-aa51-de9edfe1ba6d"></video></td>
+        </tr>
+    </tbody>
+</table>
 
-## License
+## 🤝 Contributing
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Contributions are welcome! Please follow these steps:
+
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Submit a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## 🙏 Acknowledgments
+
+- [NotebookLlama](https://github.com/NotebookLlama) - Project inspiration
+- All contributors and users

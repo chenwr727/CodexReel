@@ -3,16 +3,16 @@ from datetime import datetime
 from typing import Dict
 
 from main import url2video
+from utils.config import api_config as settings
 
 from . import crud
-from .config import settings
 from .database import AsyncSessionLocal
 from .models import TaskStatus
 
 
 class TaskService:
     _running_tasks = 0
-    _semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_TASKS)
+    _semaphore = asyncio.Semaphore(settings.max_concurrent_tasks)
     _background_tasks: Dict[int, asyncio.Task] = {}
 
     @classmethod
@@ -36,12 +36,10 @@ class TaskService:
                     try:
                         result = await asyncio.wait_for(
                             url2video(name, task_id),
-                            timeout=float(settings.TASK_TIMEOUT_SECONDS),
+                            timeout=float(settings.task_timeout_seconds),
                         )
 
-                        await crud.update_task_status(
-                            session, task, TaskStatus.COMPLETED, result=result
-                        )
+                        await crud.update_task_status(session, task, TaskStatus.COMPLETED, result=result)
 
                     except asyncio.CancelledError:
                         await crud.update_task_status(
@@ -57,13 +55,11 @@ class TaskService:
                             session,
                             task,
                             TaskStatus.TIMEOUT,
-                            f"Task exceeded {settings.TASK_TIMEOUT_SECONDS} second timeout limit",
+                            f"Task exceeded {settings.task_timeout_seconds} second timeout limit",
                         )
 
                     except Exception as e:
-                        await crud.update_task_status(
-                            session, task, TaskStatus.FAILED, str(e)
-                        )
+                        await crud.update_task_status(session, task, TaskStatus.FAILED, str(e))
                         raise
 
         finally:
