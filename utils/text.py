@@ -3,7 +3,7 @@ from typing import List
 
 
 def split_content_with_punctuation(content: str, min_length: int = 10) -> List[str]:
-    punctuation_pattern = r"([。！？\.\!\?])"
+    punctuation_pattern = r"([。！？；])"
     parts = re.split(punctuation_pattern, content)
 
     sentences = []
