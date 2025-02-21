@@ -7,8 +7,8 @@ from dashscope.audio.tts_v2 import SpeechSynthesizer
 from moviepy import AudioFileClip
 from tqdm import tqdm
 
+from schemas.video import Dialogue
 from utils.log import logger
-from utils.schema import Dialogue
 
 
 class TextToSpeechConverter:

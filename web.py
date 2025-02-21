@@ -168,14 +168,15 @@ def main():
                         if task_data["result"]:
                             if task_data["status"] == "completed":
                                 st.markdown("### Task Result")
-                                st.video(task_data["result"])
-                                with open(task_data["result"], "rb") as f:
-                                    st.download_button(
-                                        label="Download Video",
-                                        data=f,
-                                        file_name=f"{task_data['id']}.mp4",
-                                        mime="video/mp4",
-                                    )
+                                if os.path.exists(task_data["result"]):
+                                    st.video(task_data["result"])
+                                    with open(task_data["result"], "rb") as f:
+                                        st.download_button(
+                                            label="Download Video",
+                                            data=f,
+                                            file_name=f"{task_data['id']}.mp4",
+                                            mime="video/mp4",
+                                        )
                             else:
                                 st.markdown(f"```{task_data['result']}```")
                     else:

@@ -20,16 +20,6 @@ class TTSConfig(BaseModel):
     voices: List[str]
 
 
-class TTIConfig(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    api_key: str
-    base_url: str
-    model: str
-    prompt: str
-    image_num: int
-    image_size: str
-
-
 class VideoConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     fps: int
@@ -59,25 +49,6 @@ class Config(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     llm: LLMConfig
     tts: TTSConfig
-    tti: TTIConfig
     video: VideoConfig
     api: ApiConfig
     pexels: PexelsConfig
-
-
-class Dialogue(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    speaker: str
-    contents: List[str]
-
-
-class VideoTranscript(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    topic: str
-    dialogues: List[Dialogue]
-
-
-class MaterialInfo(BaseModel):
-    url: str
-    duration: int
-    video_path: str = ""

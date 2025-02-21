@@ -19,7 +19,6 @@ class LLmWriter:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                timeout=300,
                 **kwargs,
             )
             if (

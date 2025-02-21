@@ -1,6 +1,6 @@
 import toml
 
-from utils.schema import Config
+from schemas.config import Config
 
 
 def load_config(config_file: str = "config.toml") -> dict:
@@ -11,3 +11,4 @@ def load_config(config_file: str = "config.toml") -> dict:
 
 _cfg = load_config()
 config = Config.model_validate(_cfg)
+api_config = config.api

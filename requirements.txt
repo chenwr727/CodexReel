@@ -1,4 +1,5 @@
 aiosqlite
+async_lru
 beautifulsoup4
 dashscope
 fake_useragent

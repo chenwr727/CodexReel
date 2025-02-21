@@ -3,8 +3,9 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from schemas.task import TaskCreate
+
 from .models import Task, TaskStatus
-from .schemas import TaskCreate
 
 
 async def create_task(session: Session, task: TaskCreate) -> Task:
@@ -27,23 +28,17 @@ async def get_task(session: Session, task_id: int) -> Task:
 
 async def get_status(session: Session, task_date: str) -> dict[str, int]:
     result = await session.execute(
-        select(Task.status, func.count(Task.id))
-        .where(Task.create_time.like(f"%{task_date}%"))
-        .group_by(Task.status)
+        select(Task.status, func.count(Task.id)).where(Task.create_time.like(f"%{task_date}%")).group_by(Task.status)
     )
     return dict(result.all())
 
 
 async def get_task_list(session: Session, task_date: str) -> list[Task]:
-    result = await session.execute(
-        select(Task).where(Task.update_time.like(f"%{task_date}%"))
-    )
+    result = await session.execute(select(Task).where(Task.update_time.like(f"%{task_date}%")))
     return result.scalars().all()
 
 
-async def update_task_status(
-    session: Session, task: Task, status: TaskStatus, error_message=None, result=None
-) -> Task:
+async def update_task_status(session: Session, task: Task, status: TaskStatus, error_message=None, result=None) -> Task:
     task.status = status
     if error_message:
         task.error_message = error_message
