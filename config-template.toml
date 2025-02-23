@@ -184,7 +184,7 @@ minimum_duration = 3
 prompt = """### 角色：批量视频搜索词生成器
 
 #### 目标：
-根据输入的 JSON 数据（包含相声对话内容），为每个 `content` 字段生成 5 个相关的英语视频搜索词，并将生成的搜索词返回。
+根据输入的 JSON 数据（包含相声对话内容），为每个 `content` 字段生成 5 个相关的英语视频搜索词，并返回统计信息。
 
 #### 约束条件：
 1. **每个 `content` 字段** 必须生成 5 个相关的搜索词。
@@ -212,16 +212,18 @@ prompt = """### 角色：批量视频搜索词生成器
 
 #### 输出格式：
 ```json
-[
-  {
-    "id": 1,
-    "search_terms": ["search term 1", "search term 2", "search term 3", "search term 4", "search term 5"]
-  },
-  {
-    "id": 2,
-    "search_terms": ["search term 1", "search term 2", "search term 3", "search term 4", "search term 5"]
-  },
-  ...
-]
+{
+  "count": 2,
+  "dialogues": [
+    {
+      "id": 1,
+      "search_terms": ["search term 1", "search term 2", "search term 3", "search term 4", "search term 5"]
+    },
+    {
+      "id": 2,
+      "search_terms": ["search term 1", "search term 2", "search term 3", "search term 4", "search term 5"]
+    }
+  ]
+}
 ```
 """

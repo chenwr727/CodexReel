@@ -11,5 +11,4 @@ Requests
 sqlalchemy
 streamlit
 toml
-tqdm
 uvicorn

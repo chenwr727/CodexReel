@@ -148,7 +148,9 @@ class VideoGenerator:
         self._write_json(files.videos, [video.model_dump() for video in videos])
         return videos
 
-    async def _get_search_terms(self, video_transcript: VideoTranscript, files: ProcessingFiles) -> List[str]:
+    async def _get_search_terms(
+        self, video_transcript: VideoTranscript, files: ProcessingFiles, max_retries: int = 3
+    ) -> List[str]:
         """Get search terms for video content."""
         logger.info("Starting to get search terms")
         if os.path.exists(files.terms):
@@ -158,15 +160,20 @@ class VideoGenerator:
             {"id": i + 1, "content": "".join(dialogue.contents)}
             for i, dialogue in enumerate(video_transcript.dialogues)
         ]
-        content = await self.assistant.writer(
-            str(content_list), self.config.pexels.prompt, response_format={"type": "json_object"}
-        )
-        json_match = re.search(r"(\[.*\s?\])", content, re.DOTALL)
-        if not json_match:
-            raise ValueError("No valid JSON found in search terms response")
 
-        results = json.loads(json_match.group(1))
-        if len(results) != len(content_list):
+        for _ in range(max_retries):
+            content = await self.assistant.writer(
+                str(content_list), self.config.pexels.prompt, response_format={"type": "json_object"}
+            )
+            json_match = re.search(r"(\[.*\s?\])", content, re.DOTALL)
+            if not json_match:
+                logger.warning("No valid JSON found in search terms response")
+                continue
+            results = json.loads(json_match.group(1))
+            if len(results) != len(content_list):
+                logger.warning("Number of search terms does not match number of dialogues")
+            break
+        else:
             raise ValueError("Number of search terms does not match number of dialogues")
         search_terms = [result["search_terms"] for result in results]
         self._write_json(files.terms, search_terms)
@@ -239,4 +246,4 @@ class VideoGenerator:
 
         except Exception as e:
             logger.error(f"Error in video generation: {str(e)}")
-            return None
+            raise e

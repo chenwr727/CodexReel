@@ -5,7 +5,6 @@ from typing import List
 import dashscope
 from dashscope.audio.tts_v2 import SpeechSynthesizer
 from moviepy import AudioFileClip
-from tqdm import tqdm
 
 from schemas.video import Dialogue
 from utils.log import logger
@@ -20,7 +19,7 @@ class TextToSpeechConverter:
 
         dashscope.api_key = self.api_key
 
-    async def process_dialogue(self, index: int, dialogue: Dialogue):
+    async def process_dialogue(self, index: int, dialogue: Dialogue, max_retries: int = 3):
         duration = 0
 
         contents = dialogue.contents
@@ -32,7 +31,7 @@ class TextToSpeechConverter:
                 duration += AudioFileClip(file_name).duration
                 continue
             synthesizer = SpeechSynthesizer(model=self.model, voice=voice, speech_rate=1.2)
-            for _ in range(3):
+            for _ in range(max_retries):
                 try:
                     audio = synthesizer.call(content)
                     with open(file_name, "wb") as f:
@@ -51,11 +50,13 @@ class TextToSpeechConverter:
     async def text_to_speech(self, dialogues: List[Dialogue]):
         durations = []
 
-        for i, dialogue in tqdm(enumerate(dialogues), desc="Create Audio", total=len(dialogues)):
+        total = len(dialogues)
+        for i, dialogue in enumerate(dialogues):
+            logger.info(f"Generating audio {i+1}/{total}")
             duration = await self.process_dialogue(i, dialogue)
             if duration:
                 durations.append(duration)
             else:
                 logger.error(f"Error generate audio {i}")
-                return []
+                raise ValueError("Error generate audio")
         return durations

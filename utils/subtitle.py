@@ -14,7 +14,7 @@ async def find_split_index(current_line: str, font: str, font_size: int, max_wid
 
 
 async def wrap_text_by_punctuation_and_width(text: str, max_width: int, font: str, font_size: int) -> TextClip:
-    punctuation = r"[，。！？]"
+    punctuation = r"[，。！？；”]"
     english_char = r"[a-zA-Z]"
     words = re.split(f"({punctuation})", text)
 

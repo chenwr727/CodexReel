@@ -5,7 +5,6 @@ import subprocess
 from typing import List
 
 from moviepy import AudioFileClip, CompositeVideoClip, VideoClip, VideoFileClip, vfx
-from tqdm import tqdm
 
 from schemas.config import VideoConfig
 from schemas.video import Dialogue, MaterialInfo
@@ -41,13 +40,13 @@ async def merge_videos(
         "-i",
         background_audio,
         "-filter_complex",
-        "[1:a]volume=0.2[v1];[0:a][v1]amerge=inputs=2[a]",
+        "[1:a]volume=0.3[v1];[0:a][v1]amerge=inputs=2[a]",
         "-map",
         "0:v",
         "-map",
         "[a]",
         "-c:v",
-        "copy",
+        "libx264",
         "-c:a",
         "aac",
         "-shortest",
@@ -77,11 +76,14 @@ def transition_video(video: VideoClip) -> VideoClip:
 async def create_video(
     videos: List[MaterialInfo], dialogues: List[Dialogue], folder: str, output_file: str, video_config: VideoConfig
 ) -> VideoClip:
+    logger.info("Creating video...")
     subtitle_width = int(video_config.width * 0.8)
     font_size = int(subtitle_width / 16)
     subtitle_position = int(video_config.height * 2 / 3)
 
-    for i, dialogue in tqdm(enumerate(dialogues), desc="Creating video", total=len(dialogues)):
+    total = len(dialogues)
+    for i, dialogue in enumerate(dialogues):
+        logger.info(f"Creating video {i+1}/{total}")
         video_file = os.path.join(folder, f"{i}.mp4")
         if os.path.exists(video_file):
             continue
@@ -121,6 +123,7 @@ async def create_video(
             logger.error(f"Error writing video file: {e}")
             if os.path.exists(video_file):
                 os.remove(video_file)
+            raise e
 
         del audio
         del video
@@ -130,6 +133,7 @@ async def create_video(
 
         gc.collect()
 
+    logger.info("Merging videos...")
     video_files = [f"{i}.mp4" for i in range(len(dialogues))]
     list_file = os.path.join(folder, "listfile.txt")
     await merge_videos(video_files, output_file, list_file, video_config.background_audio)
