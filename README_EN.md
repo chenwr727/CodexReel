@@ -1,3 +1,5 @@
+English | [简体中文](README.md)
+
 # URL2VideoStudio 🎬
 
 > Transform articles into engaging video content with one click!

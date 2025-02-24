@@ -1,3 +1,5 @@
+简体中文 | [English](README_EN.md)
+
 # URL2VideoStudio 🎬
 
 > 一键将文章转换为引人入胜的视频内容！
