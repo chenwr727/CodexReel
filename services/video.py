@@ -161,7 +161,8 @@ class VideoGenerator:
             for i, dialogue in enumerate(video_transcript.dialogues)
         ]
 
-        for _ in range(max_retries):
+        for i in range(max_retries):
+            logger.debug(f"Trying to get search terms {i+1}/{max_retries}")
             content = await self.assistant.writer(
                 str(content_list), self.config.pexels.prompt, response_format={"type": "json_object"}
             )
@@ -172,10 +173,14 @@ class VideoGenerator:
             results = json.loads(json_match.group(1))
             if len(results) != len(content_list):
                 logger.warning("Number of search terms does not match number of dialogues")
-            break
+            try:
+                search_terms = [result["search_terms"] for result in results]
+                break
+            except KeyError:
+                logger.warning("Invalid search terms response")
+                continue
         else:
             raise ValueError("Number of search terms does not match number of dialogues")
-        search_terms = [result["search_terms"] for result in results]
         self._write_json(files.terms, search_terms)
         return search_terms
 

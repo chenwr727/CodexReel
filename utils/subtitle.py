@@ -22,6 +22,8 @@ async def wrap_text_by_punctuation_and_width(text: str, max_width: int, font: st
     current_line = ""
 
     for word in words:
+        if word == "":
+            continue
         if re.match(punctuation, word):
             current_line += word
             continue
@@ -58,10 +60,22 @@ async def wrap_text_by_punctuation_and_width(text: str, max_width: int, font: st
     return "\n".join(lines)
 
 
-async def create_subtitle(text: str, position: int, max_width: int, font: str, font_size: int) -> TextClip:
-    text = await wrap_text_by_punctuation_and_width(text, max_width, font, font_size)
+async def create_subtitle(
+    text: str,
+    video_width: int,
+    video_height: int,
+    font: str,
+    width_ratio: float = 0.8,
+    font_size_ratio: int = 17,
+    position_ratio: float = 2 / 3,
+) -> TextClip:
+    subtitle_width = int(video_width * width_ratio)
+    font_size = int(subtitle_width / font_size_ratio)
+    subtitle_position = int(video_height * position_ratio)
+
+    text = await wrap_text_by_punctuation_and_width(text, subtitle_width, font, font_size)
     txt_clip = TextClip(
         font, text, font_size=font_size, color="white", stroke_color="black", stroke_width=1, text_align="center"
     )
-    txt_clip = txt_clip.with_position(("center", position - txt_clip.size[1] // 2))
+    txt_clip = txt_clip.with_position(("center", subtitle_position - txt_clip.size[1] // 2))
     return txt_clip

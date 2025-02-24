@@ -77,9 +77,6 @@ async def create_video(
     videos: List[MaterialInfo], dialogues: List[Dialogue], folder: str, output_file: str, video_config: VideoConfig
 ) -> VideoClip:
     logger.info("Creating video...")
-    subtitle_width = int(video_config.width * 0.8)
-    font_size = int(subtitle_width / 16)
-    subtitle_position = int(video_config.height * 2 / 3)
 
     total = len(dialogues)
     for i, dialogue in enumerate(dialogues):
@@ -102,7 +99,7 @@ async def create_video(
             audio_file = os.path.join(folder, f"{i}_{j}.mp3")
             audio = AudioFileClip(audio_file)
 
-            txt_clip = await create_subtitle(text, subtitle_position, subtitle_width, video_config.font, font_size)
+            txt_clip = await create_subtitle(text, video_config.width, video_config.height, video_config.font)
 
             video_sub = video.subclipped(duration_start, duration_start + audio.duration)
             video_sub = video_sub.with_audio(audio).with_start(duration_start)
