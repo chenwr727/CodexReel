@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -20,14 +20,25 @@ class TTSConfig(BaseModel):
     voices: List[str]
 
 
+class SubtitleConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    font: str
+    width_ratio: float = 0.8
+    font_size_ratio: int = 17
+    position_ratio: float = 2 / 3
+    color: str = "white"
+    stroke_color: str = "black"
+    stroke_width: int = 1
+    text_align: str = "center"
+
+
 class VideoConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     fps: int
-    font: str
-    opening_audio: str
     background_audio: str
     width: int
     height: int
+    subtitle: Optional[SubtitleConfig] = None
 
 
 class ApiConfig(BaseModel):
@@ -41,6 +52,7 @@ class ApiConfig(BaseModel):
 class PexelsConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     api_key: str
+    locale: str = ""
     minimum_duration: int
     prompt: str
 

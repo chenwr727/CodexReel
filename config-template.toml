@@ -166,11 +166,19 @@ voices = ["longwan", "longcheng"]
 
 [video]
 fps = 24
-font = "./fonts/DreamHanSans-W20.ttc"
-opening_audio = "./resource/opening.mp3"
 background_audio = "./resource/bgm.mp3"
 width = 1080
 height = 1920
+
+[subtitle]
+font = "./fonts/DreamHanSans-W20.ttc"
+width_ratio = 0.8
+font_size_ratio = 17
+position_ratio = 0.667
+color = "white"
+stroke_color = "black"
+stroke_width = 1
+text_align = "center"
 
 [api]
 database_url = "sqlite+aiosqlite:///tasks.db"
@@ -180,6 +188,7 @@ task_timeout_seconds = 600
 
 [pexels]
 api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+locale = ""
 minimum_duration = 3
 prompt = """### 角色：批量视频搜索词生成器
 

@@ -13,11 +13,14 @@ from utils.log import logger
 
 
 class PexelsHelper:
-    def __init__(self, api_key: str, video_width: int, video_height: int, minimum_duration: int, max_page: int = 3):
+    def __init__(
+        self, api_key: str, locale: str, minimum_duration: int, video_width: int, video_height: int, max_page: int = 3
+    ):
         self.api_key = api_key
+        self.locale = locale
+        self.minimum_duration = minimum_duration
         self.video_width = video_width
         self.video_height = video_height
-        self.minimum_duration = minimum_duration
 
         if video_width < video_height:
             video_orientation = "portrait"
@@ -54,18 +57,27 @@ class PexelsHelper:
             duration = v["duration"]
             if duration < self.minimum_duration:
                 continue
+            w = v["width"]
+            h = v["height"]
+            if w < self.video_width or h < self.video_height:
+                continue
+            if not math.isclose(w / h, self.video_width / self.video_height, rel_tol=1e-5):
+                continue
             video_files = v["video_files"]
+            w_diff = float("inf")
+            item = None
             for video in video_files:
-                w = int(video["width"])
-                h = int(video["height"])
-                if (
-                    w >= self.video_width
-                    and h >= self.video_height
-                    and math.isclose(w / h, self.video_width / self.video_height, rel_tol=1e-9)
-                ):
+                w = video["width"]
+                h = video["height"]
+                if w < self.video_width or h < self.video_height:
+                    continue
+                if w - self.video_width < w_diff:
+                    w_diff = w - self.video_width
                     item = MaterialInfo(url=video["link"], duration=duration)
-                    video_items.append(item)
-                    break
+                    if w_diff == 0:
+                        break
+            if item:
+                video_items.append(item)
         return video_items
 
     async def get_videos(self, audio_lengths: List[float], search_terms_list: List[List[str]]) -> List[MaterialInfo]:
@@ -98,6 +110,8 @@ class PexelsHelper:
     @alru_cache()
     async def search_videos(self, search_term: str, page: int) -> List[MaterialInfo]:
         params = {"query": search_term, "orientation": self.video_orientation, "per_page": 20, "page": page}
+        if self.locale:
+            params["locale"] = self.locale
         headers = self.headers.copy()
         headers.update({"Authorization": self.api_key})
 

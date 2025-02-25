@@ -140,9 +140,10 @@ class VideoGenerator:
         search_terms = await self._get_search_terms(video_transcript, files)
         pexels_helper = PexelsHelper(
             self.config.pexels.api_key,
+            self.config.pexels.locale,
+            self.config.pexels.minimum_duration,
             self.config.video.width,
             self.config.video.height,
-            self.config.pexels.minimum_duration,
         )
         videos = await pexels_helper.get_videos(durations, search_terms)
         self._write_json(files.videos, [video.model_dump() for video in videos])

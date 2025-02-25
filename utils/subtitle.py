@@ -2,11 +2,13 @@ import re
 
 from moviepy import TextClip
 
+from schemas.config import SubtitleConfig
+
 
 async def find_split_index(current_line: str, font: str, font_size: int, max_width: int) -> int:
     split_index = len(current_line)
     for i in range(len(current_line) - 1, 0, -1):
-        temp_clip = TextClip(font, current_line[:i], font_size=font_size, color="white")
+        temp_clip = TextClip(font, current_line[:i], font_size=font_size)
         if temp_clip.size[0] <= max_width:
             split_index = i
             break
@@ -31,7 +33,7 @@ async def wrap_text_by_punctuation_and_width(text: str, max_width: int, font: st
         current_line += word
 
         while current_line:
-            temp_clip = TextClip(font, current_line, font_size=font_size, color="white")
+            temp_clip = TextClip(font, current_line, font_size=font_size)
             if temp_clip.size[0] <= max_width:
                 break
             else:
@@ -64,18 +66,21 @@ async def create_subtitle(
     text: str,
     video_width: int,
     video_height: int,
-    font: str,
-    width_ratio: float = 0.8,
-    font_size_ratio: int = 17,
-    position_ratio: float = 2 / 3,
+    subtitle_config: SubtitleConfig,
 ) -> TextClip:
-    subtitle_width = int(video_width * width_ratio)
-    font_size = int(subtitle_width / font_size_ratio)
-    subtitle_position = int(video_height * position_ratio)
+    subtitle_width = int(video_width * subtitle_config.width_ratio)
+    font_size = int(subtitle_width / subtitle_config.font_size_ratio)
+    subtitle_position = int(video_height * subtitle_config.position_ratio)
 
-    text = await wrap_text_by_punctuation_and_width(text, subtitle_width, font, font_size)
+    text = await wrap_text_by_punctuation_and_width(text, subtitle_width, subtitle_config.font, font_size)
     txt_clip = TextClip(
-        font, text, font_size=font_size, color="white", stroke_color="black", stroke_width=1, text_align="center"
+        subtitle_config.font,
+        text,
+        font_size=font_size,
+        color=subtitle_config.color,
+        stroke_color=subtitle_config.stroke_color,
+        stroke_width=subtitle_config.stroke_width,
+        text_align=subtitle_config.text_align,
     )
     txt_clip = txt_clip.with_position(("center", subtitle_position - txt_clip.size[1] // 2))
     return txt_clip

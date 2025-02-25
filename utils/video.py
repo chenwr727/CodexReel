@@ -99,7 +99,7 @@ async def create_video(
             audio_file = os.path.join(folder, f"{i}_{j}.mp3")
             audio = AudioFileClip(audio_file)
 
-            txt_clip = await create_subtitle(text, video_config.width, video_config.height, video_config.font)
+            txt_clip = await create_subtitle(text, video_config.width, video_config.height, video_config.subtitle)
 
             video_sub = video.subclipped(duration_start, duration_start + audio.duration)
             video_sub = video_sub.with_audio(audio).with_start(duration_start)
