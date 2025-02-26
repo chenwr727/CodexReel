@@ -1,6 +1,12 @@
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
+
+
+class TTSSource(str, Enum):
+    dashscope = "dashscope"
+    edge = "edge"
 
 
 class LLMConfig(BaseModel):
@@ -15,8 +21,9 @@ class LLMConfig(BaseModel):
 
 class TTSConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    api_key: str
-    model: str
+    source: TTSSource
+    api_key: str = ""
+    model: str = ""
     voices: List[str]
 
 

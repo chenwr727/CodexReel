@@ -4,8 +4,9 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from schemas.config import TTSSource
 from schemas.video import VideoTranscript
-from services import LLmWriter, PexelsHelper, TextToSpeechConverter
+from services import LLmWriter, PexelsHelper
 from utils.config import config
 from utils.log import logger
 from utils.text import split_content_with_punctuation
@@ -119,12 +120,21 @@ class VideoGenerator:
         if os.path.exists(files.durations):
             return json.loads(self._read_file(files.durations))
 
-        converter = TextToSpeechConverter(
-            self.config.tts.api_key,
-            self.config.tts.model,
-            self.config.tts.voices,
-            files.folder,
-        )
+        if self.config.tts.source == TTSSource.dashscope:
+            from services.tts import DashscopeTextToSpeechConverter
+
+            converter = DashscopeTextToSpeechConverter(
+                self.config.tts.api_key,
+                self.config.tts.model,
+                self.config.tts.voices,
+                files.folder,
+            )
+        elif self.config.tts.source == TTSSource.edge:
+            from services.tts import EdgeTextToSpeechConverter
+
+            converter = EdgeTextToSpeechConverter(self.config.tts.voices, files.folder)
+        else:
+            raise ValueError("Invalid TTS source")
         durations = await converter.text_to_speech(video_transcript.dialogues)
         self._write_json(files.durations, durations)
         return durations

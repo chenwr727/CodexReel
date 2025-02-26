@@ -160,9 +160,12 @@ prompt_rewriter = """**你是一位技艺精湛的相声改编大师，曾多次
 """
 
 [tts]
+source = "dashscope"
 api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 model = "cosyvoice-v1"
 voices = ["longwan", "longcheng"]
+# source = "edge"
+# voices = ["zh-CN-XiaoyiNeural", "zh-CN-YunyangNeural"]
 
 [video]
 fps = 24
