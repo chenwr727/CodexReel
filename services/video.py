@@ -4,9 +4,9 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from schemas.config import TTSSource
-from schemas.video import VideoTranscript
-from services import LLmWriter, PexelsHelper
+from schemas.config import MaterialSource, TTSSource
+from schemas.video import MaterialInfo, VideoTranscript
+from services.llm import LLmWriter
 from utils.config import config
 from utils.log import logger
 from utils.text import split_content_with_punctuation
@@ -141,21 +141,39 @@ class VideoGenerator:
 
     async def _process_videos(
         self, video_transcript: VideoTranscript, durations: List[float], files: ProcessingFiles
-    ) -> List[Dict[str, Any]]:
+    ) -> List[MaterialInfo]:
         """Process videos for the final output."""
         logger.info("Starting to process videos")
         if os.path.exists(files.videos):
-            return json.loads(self._read_file(files.videos))
+            datas = json.loads(self._read_file(files.videos))
+            return [MaterialInfo.model_validate(data) for data in datas]
 
         search_terms = await self._get_search_terms(video_transcript, files)
-        pexels_helper = PexelsHelper(
-            self.config.pexels.api_key,
-            self.config.pexels.locale,
-            self.config.pexels.minimum_duration,
-            self.config.video.width,
-            self.config.video.height,
-        )
-        videos = await pexels_helper.get_videos(durations, search_terms)
+
+        if self.config.material.source == MaterialSource.pexels:
+            from services.material import PexelsHelper
+
+            material_helper = PexelsHelper(
+                self.config.material.api_key,
+                self.config.material.locale,
+                self.config.material.minimum_duration,
+                self.config.video.width,
+                self.config.video.height,
+            )
+        elif self.config.material.source == MaterialSource.pixabay:
+            from services.material import PixabayHelper
+
+            material_helper = PixabayHelper(
+                self.config.material.api_key,
+                self.config.material.lang,
+                self.config.material.video_type,
+                self.config.material.minimum_duration,
+                self.config.video.width,
+                self.config.video.height,
+            )
+        else:
+            raise ValueError("Invalid material source")
+        videos = await material_helper.get_videos(durations, search_terms)
         self._write_json(files.videos, [video.model_dump() for video in videos])
         return videos
 
@@ -175,7 +193,7 @@ class VideoGenerator:
         for i in range(max_retries):
             logger.debug(f"Trying to get search terms {i+1}/{max_retries}")
             content = await self.assistant.writer(
-                str(content_list), self.config.pexels.prompt, response_format={"type": "json_object"}
+                str(content_list), self.config.material.prompt, response_format={"type": "json_object"}
             )
             json_match = re.search(r"(\[.*\s?\])", content, re.DOTALL)
             if not json_match:

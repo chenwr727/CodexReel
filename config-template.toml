@@ -189,9 +189,14 @@ app_port = 8000
 max_concurrent_tasks = 1
 task_timeout_seconds = 600
 
-[pexels]
+[material]
+# source = "pexels"
+# api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# locale = "zh-CN"
+source = "pixabay"
 api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-locale = ""
+lang = "zh"
+video_type = "all"
 minimum_duration = 3
 prompt = """### 角色：批量视频搜索词生成器
 

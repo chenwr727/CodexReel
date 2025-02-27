@@ -9,6 +9,11 @@ class TTSSource(str, Enum):
     edge = "edge"
 
 
+class MaterialSource(str, Enum):
+    pexels = "pexels"
+    pixabay = "pixabay"
+
+
 class LLMConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     api_key: str
@@ -56,12 +61,15 @@ class ApiConfig(BaseModel):
     task_timeout_seconds: int
 
 
-class PexelsConfig(BaseModel):
+class MaterialConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    source: MaterialSource
     api_key: str
-    locale: str = ""
     minimum_duration: int
     prompt: str
+    locale: str = ""
+    lang: str = "zh"
+    video_type: str = "all"
 
 
 class Config(BaseModel):
@@ -70,4 +78,4 @@ class Config(BaseModel):
     tts: TTSConfig
     video: VideoConfig
     api: ApiConfig
-    pexels: PexelsConfig
+    material: MaterialConfig

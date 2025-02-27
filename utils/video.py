@@ -73,6 +73,25 @@ def transition_video(video: VideoClip) -> VideoClip:
     return shuffle_transition(video)
 
 
+def resize_video(video: VideoFileClip, video_width: int, video_height: int) -> VideoClip:
+    if video.size[0] / video.size[1] != video_width / video_height:
+        target_aspect_ratio = video_width / video_height
+        video_aspect_ratio = video.size[0] / video.size[1]
+
+        if video_aspect_ratio > target_aspect_ratio:
+            new_width = int(video.size[1] * target_aspect_ratio)
+            crop_x = (video.size[0] - new_width) // 2
+            video = video.cropped(x1=crop_x, x2=crop_x + new_width, y1=0, y2=video.size[1])
+        else:
+            new_height = int(video.size[0] / target_aspect_ratio)
+            crop_y = (video.size[1] - new_height) // 2
+            video = video.cropped(x1=0, x2=video.size[0], y1=crop_y, y2=crop_y + new_height)
+
+    if video.size[0] != video_width:
+        video = video.resized((video_width, video_height))
+    return video
+
+
 async def create_video(
     videos: List[MaterialInfo], dialogues: List[Dialogue], folder: str, output_file: str, video_config: VideoConfig
 ) -> VideoClip:
@@ -87,8 +106,7 @@ async def create_video(
 
         texts = dialogue.contents
         video = VideoFileClip(videos[i].video_path).without_audio()
-        if video.size[0] != video_config.width:
-            video = video.resized((video_config.width, video_config.height))
+        video = resize_video(video, video_config.width, video_config.height)
         final_videos = []
         txt_clips = []
         duration_start = 0
