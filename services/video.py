@@ -63,9 +63,7 @@ class VideoGenerator:
             logger.info("Draft file already exists")
             return self._read_file(files.draft)
 
-        text_writer = await self.assistant.writer(
-            f"文章内容：\n{content}", self.config.llm.prompt_writer, response_format={"type": "json_object"}
-        )
+        text_writer = await self.assistant.writer(f"网页内容：\n{content}", self.config.llm.prompt_writer)
         if text_writer:
             self._write_file(files.draft, text_writer)
             return text_writer
@@ -79,9 +77,7 @@ class VideoGenerator:
             return self._read_file(files.reflected)
 
         text_reflector = await self.assistant.writer(
-            f"文章内容：\n{content}\n\n初稿文案：\n{draft}",
-            self.config.llm.prompt_reflector,
-            response_format={"type": "json_object"},
+            f"网页内容：\n{content}\n\n初始脚本：\n{draft}", self.config.llm.prompt_reflector
         )
         if text_reflector:
             self._write_file(files.reflected, text_reflector)
@@ -92,7 +88,7 @@ class VideoGenerator:
         """Generate final video transcript."""
         logger.info("Starting to generate final transcript")
         text_rewriter = await self.assistant.writer(
-            f"文章内容：\n{content}\n\n初稿文案：\n{draft}\n\n反思建议：\n{reflection}",
+            f"网页内容：\n{content}\n\n初始脚本：\n{draft}\n\n评审意见：\n{reflection}",
             self.config.llm.prompt_rewriter,
             response_format={"type": "json_object"},
         )
