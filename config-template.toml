@@ -177,11 +177,23 @@ prompt_rewriter = """请根据评审意见，将初始脚本彻底重构为高�
 
 [tts]
 source = "dashscope"
+
+[tts.dashscope]
 api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 model = "cosyvoice-v1"
 voices = ["longwan", "longcheng"]
-# source = "edge"
-# voices = ["zh-CN-XiaoyiNeural", "zh-CN-YunyangNeural"]
+
+[tts.edge]
+voices = ["zh-CN-XiaoyiNeural", "zh-CN-YunyangNeural"]
+
+[tts.kokoro]
+model = "./models/kokoro/kokoro-v1_1-zh.pth"
+voices = [
+  "./models/kokoro/voices/zf_xiaoyi.pt",
+  "./models/kokoro/voices/zm_yunxi.pt",
+]
+config = "./models/kokoro/config.json"
+lang_code = "z"
 
 [video]
 fps = 24
@@ -206,13 +218,7 @@ max_concurrent_tasks = 1
 task_timeout_seconds = 600
 
 [material]
-# source = "pexels"
-# api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# locale = "zh-CN"
 source = "pixabay"
-api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-lang = "zh"
-video_type = "all"
 minimum_duration = 3
 prompt = """### 角色：批量视频搜索词生成器
 
@@ -260,3 +266,12 @@ prompt = """### 角色：批量视频搜索词生成器
 }
 ```
 """
+
+[material.pexels]
+api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+locale = "zh-CN"
+
+[material.pixabay]
+api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+lang = "zh"
+video_type = "all"

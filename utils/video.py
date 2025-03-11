@@ -133,7 +133,9 @@ async def create_video(
         final_video = CompositeVideoClip(final_videos + txt_clips)
 
         try:
-            final_video.write_videofile(video_file, codec="libx264", fps=video_config.fps, threads=4)
+            final_video.write_videofile(
+                video_file, codec="libx264", fps=video_config.fps, temp_audiofile_path=folder, threads=4
+            )
         except Exception as e:
             logger.error(f"Error writing video file: {e}")
             if os.path.exists(video_file):

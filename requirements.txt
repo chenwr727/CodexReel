@@ -2,12 +2,15 @@ aiosqlite
 async_lru
 beautifulsoup4
 dashscope
+edge-tts
 fake_useragent
 fastapi
 loguru
+kokoro
 moviepy
 openai
 Requests
+soundfile
 sqlalchemy
 streamlit
 toml

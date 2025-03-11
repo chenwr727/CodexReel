@@ -33,7 +33,7 @@ class TextToSpeechConverter(ABC):
         duration = 0
 
         contents = dialogue.contents
-        voice = self.voices[index % 2]
+        voice = self.voices[index % len(self.voices)]
 
         for i, content in enumerate(contents):
             file_name = os.path.join(self.folder, f"{index}_{i}.mp3")

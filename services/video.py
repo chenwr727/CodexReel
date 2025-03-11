@@ -120,15 +120,25 @@ class VideoGenerator:
             from services.tts import DashscopeTextToSpeechConverter
 
             converter = DashscopeTextToSpeechConverter(
-                self.config.tts.api_key,
-                self.config.tts.model,
-                self.config.tts.voices,
+                self.config.tts.dashscope.api_key,
+                self.config.tts.dashscope.model,
+                self.config.tts.dashscope.voices,
                 files.folder,
             )
         elif self.config.tts.source == TTSSource.edge:
             from services.tts import EdgeTextToSpeechConverter
 
-            converter = EdgeTextToSpeechConverter(self.config.tts.voices, files.folder)
+            converter = EdgeTextToSpeechConverter(self.config.tts.edge.voices, files.folder)
+        elif self.config.tts.source == TTSSource.kokoro:
+            from services.tts import KokoroTextToSpeechConverter
+
+            converter = KokoroTextToSpeechConverter(
+                self.config.tts.kokoro.config,
+                self.config.tts.kokoro.model,
+                self.config.tts.kokoro.lang_code,
+                self.config.tts.kokoro.voices,
+                files.folder,
+            )
         else:
             raise ValueError("Invalid TTS source")
         durations = await converter.text_to_speech(video_transcript.dialogues)
@@ -150,8 +160,8 @@ class VideoGenerator:
             from services.material import PexelsHelper
 
             material_helper = PexelsHelper(
-                self.config.material.api_key,
-                self.config.material.locale,
+                self.config.material.pexels.api_key,
+                self.config.material.pexels.locale,
                 self.config.material.minimum_duration,
                 self.config.video.width,
                 self.config.video.height,
@@ -160,9 +170,9 @@ class VideoGenerator:
             from services.material import PixabayHelper
 
             material_helper = PixabayHelper(
-                self.config.material.api_key,
-                self.config.material.lang,
-                self.config.material.video_type,
+                self.config.material.pixabay.api_key,
+                self.config.material.pixabay.lang,
+                self.config.material.pixabay.video_type,
                 self.config.material.minimum_duration,
                 self.config.video.width,
                 self.config.video.height,

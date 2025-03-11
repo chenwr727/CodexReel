@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class TTSSource(str, Enum):
     dashscope = "dashscope"
     edge = "edge"
+    kokoro = "kokoro"
 
 
 class MaterialSource(str, Enum):
@@ -24,12 +25,32 @@ class LLMConfig(BaseModel):
     prompt_rewriter: str
 
 
+class TTSDashscopeConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    api_key: str = ""
+    model: str = ""
+    voices: List[str] = []
+
+
+class TTSEdgeConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    voices: List[str] = []
+
+
+class TTSKokoroConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    model: str = ""
+    voices: List[str]
+    config: str = ""
+    lang_code: str = ""
+
+
 class TTSConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     source: TTSSource
-    api_key: str = ""
-    model: str = ""
-    voices: List[str]
+    dashscope: Optional[TTSDashscopeConfig] = None
+    edge: Optional[TTSEdgeConfig] = None
+    kokoro: Optional[TTSKokoroConfig] = None
 
 
 class SubtitleConfig(BaseModel):
@@ -61,15 +82,26 @@ class ApiConfig(BaseModel):
     task_timeout_seconds: int
 
 
+class MaterialPexelsConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    api_key: str = ""
+    locale: str = ""
+
+
+class MaterialPixabayConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    api_key: str = ""
+    lang: str = "zh"
+    video_type: str = "all"
+
+
 class MaterialConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     source: MaterialSource
-    api_key: str
     minimum_duration: int
     prompt: str
-    locale: str = ""
-    lang: str = "zh"
-    video_type: str = "all"
+    pexels: Optional[MaterialPexelsConfig] = None
+    pixabay: Optional[MaterialPixabayConfig] = None
 
 
 class Config(BaseModel):

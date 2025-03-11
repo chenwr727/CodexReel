@@ -42,6 +42,8 @@ class TaskAPIClient:
 def init_session_state():
     if "current_task" not in st.session_state:
         st.session_state.current_task = None
+    if "current_task_name" not in st.session_state:
+        st.session_state.current_task_name = None
 
 
 def format_task_data(tasks: list) -> pd.DataFrame:
@@ -119,7 +121,12 @@ def main():
             if response.status_code == 200:
                 df = format_task_data(response.json())
                 if not df.empty:
-                    st.dataframe(df, use_container_width=True)
+                    event = st.dataframe(df, use_container_width=True, on_select="rerun", selection_mode="single-row")
+                    if event.selection["rows"]:
+                        row = df.iloc[event.selection["rows"][0]]
+                        st.json(row.to_dict())
+                        st.session_state.current_task = row["id"]
+                        st.session_state.current_task_name = row["name"]
 
                     fig = px.pie(df, names="status", title="Task Status Distribution")
                     st.plotly_chart(fig)
@@ -131,7 +138,7 @@ def main():
     with tab2:
         st.subheader("Create New Task")
         with st.form("create_task_form"):
-            task_name = st.text_input("Task Name")
+            task_name = st.text_input("Task Name", value=st.session_state.current_task_name or "")
             submitted = st.form_submit_button("Create Task")
             if submitted and task_name:
                 response = api_client.create_task(task_name)
@@ -140,6 +147,7 @@ def main():
                     data = response.json()
                     st.json(data)
                     st.session_state.current_task = data["id"]
+                    st.session_state.current_task_name = task_name
                 else:
                     st.error("Failed to create task")
 
