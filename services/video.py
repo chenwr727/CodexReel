@@ -22,14 +22,14 @@ class ProcessingFiles:
 
     def __post_init__(self):
         """Initialize all file paths after instance creation."""
-        self.script = os.path.join(self.folder, f"_script.json")
-        self.html = os.path.join(self.folder, f"_html.txt")
+        self.script = os.path.join(self.folder, "_script.json")
+        self.html = os.path.join(self.folder, "_html.txt")
         self.draft = os.path.join(self.folder, "_draft.txt")
         self.reflected = os.path.join(self.folder, "_reflected.txt")
         self.durations = os.path.join(self.folder, "_durations.json")
         self.videos = os.path.join(self.folder, "_videos.json")
         self.terms = os.path.join(self.folder, "_terms.json")
-        self.output = os.path.join(self.folder, f"_output.mp4")
+        self.output = os.path.join(self.folder, "_output.mp4")
 
 
 class VideoGenerator:
@@ -63,32 +63,30 @@ class VideoGenerator:
             logger.info("Draft file already exists")
             return self._read_file(files.draft)
 
-        text_writer = await self.assistant.writer(f"网页内容：\n{content}", self.config.llm.prompt_writer)
+        text_writer = await self.assistant.writer(content, self.config.llm.prompt_writer)
         if text_writer:
             self._write_file(files.draft, text_writer)
             return text_writer
         return None
 
-    async def _generate_reflection(self, content: str, draft: str, files: ProcessingFiles) -> Optional[str]:
+    async def _generate_reflection(self, draft: str, files: ProcessingFiles) -> Optional[str]:
         """Generate reflection on the draft."""
         logger.info("Starting to generate reflection")
         if os.path.exists(files.reflected):
             logger.info("Reflection file already exists")
             return self._read_file(files.reflected)
 
-        text_reflector = await self.assistant.writer(
-            f"网页内容：\n{content}\n\n初始脚本：\n{draft}", self.config.llm.prompt_reflector
-        )
+        text_reflector = await self.assistant.writer(draft, self.config.llm.prompt_reflector)
         if text_reflector:
             self._write_file(files.reflected, text_reflector)
             return text_reflector
         return None
 
-    async def _generate_final_transcript(self, content: str, draft: str, reflection: str) -> Optional[Dict[str, Any]]:
+    async def _generate_final_transcript(self, draft: str, reflection: str) -> Optional[Dict[str, Any]]:
         """Generate final video transcript."""
         logger.info("Starting to generate final transcript")
         text_rewriter = await self.assistant.writer(
-            f"网页内容：\n{content}\n\n初始脚本：\n{draft}\n\n评审意见：\n{reflection}",
+            f"初稿：\n{draft}\n\n评审意见：\n{reflection}",
             self.config.llm.prompt_rewriter,
             response_format={"type": "json_object"},
         )
@@ -259,11 +257,11 @@ class VideoGenerator:
                 if not draft:
                     raise ValueError("Failed to generate draft")
 
-                reflection = await self._generate_reflection(content, draft, files)
+                reflection = await self._generate_reflection(draft, files)
                 if not reflection:
                     raise ValueError("Failed to generate reflection")
 
-                final_transcript = await self._generate_final_transcript(content, draft, reflection)
+                final_transcript = await self._generate_final_transcript(draft, reflection)
                 if not final_transcript:
                     raise ValueError("Failed to generate final transcript")
 

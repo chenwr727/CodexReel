@@ -3,7 +3,6 @@ import json
 import os
 
 import pandas as pd
-import plotly.express as px
 import requests
 import streamlit as st
 import streamlit_authenticator as stauth
@@ -39,9 +38,20 @@ class TaskAPIClient:
         return requests.get(url)
 
 
+@st.cache_data(ttl="4h")
+def get_hot_list():
+    url = "https://api.vvhan.com/api/hotlist/all"
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return []
+    except Exception:
+        return []
+
+
 def init_session_state():
-    if "current_task" not in st.session_state:
-        st.session_state.current_task = None
     if "current_task_name" not in st.session_state:
         st.session_state.current_task_name = None
 
@@ -83,10 +93,10 @@ def handle_authentication(authenticator: stauth.Authenticate) -> bool:
     try:
         authenticator.login()
 
-        if st.session_state["authentication_status"] == False:
+        if not st.session_state["authentication_status"]:
             st.error("Username/password is incorrect")
             return False
-        elif st.session_state["authentication_status"] == None:
+        elif st.session_state["authentication_status"] is None:
             st.warning("Please enter your username and password")
             return False
 
@@ -105,10 +115,9 @@ def main():
     if not handle_authentication(authenticator):
         return
 
-    tab1, tab2, tab3 = st.tabs(["Task List", "Create Task", "Task Details"])
+    tab1, tab2 = st.tabs(["Task List", "Create Task"])
 
     with tab1:
-        st.subheader("Task List")
         col1, col2 = st.columns([2, 1])
         with col1:
             task_date = st.date_input("Select Date", datetime.date.today())
@@ -121,46 +130,23 @@ def main():
             if response.status_code == 200:
                 df = format_task_data(response.json())
                 if not df.empty:
-                    event = st.dataframe(df, use_container_width=True, on_select="rerun", selection_mode="single-row")
+                    event = st.dataframe(
+                        df,
+                        hide_index=True,
+                        use_container_width=True,
+                        on_select="rerun",
+                        selection_mode="single-row",
+                        column_config={"name": st.column_config.LinkColumn(validate=r"^https?://.+$")},
+                    )
                     if event.selection["rows"]:
-                        row = df.iloc[event.selection["rows"][0]]
-                        st.json(row.to_dict())
-                        st.session_state.current_task = row["id"]
-                        st.session_state.current_task_name = row["name"]
+                        task_data = df.iloc[event.selection["rows"][0]]
+                        task_id = task_data["id"]
 
-                    fig = px.pie(df, names="status", title="Task Status Distribution")
-                    st.plotly_chart(fig)
-                else:
-                    st.info("No task records for the selected date")
-            else:
-                st.error("Failed to retrieve task list")
+                        if st.button("Check Status"):
+                            response = api_client.get_task_status(task_id)
+                            if response.status_code == 200:
+                                task_data = response.json()
 
-    with tab2:
-        st.subheader("Create New Task")
-        with st.form("create_task_form"):
-            task_name = st.text_input("Task Name", value=st.session_state.current_task_name or "")
-            submitted = st.form_submit_button("Create Task")
-            if submitted and task_name:
-                response = api_client.create_task(task_name)
-                if response.status_code == 200:
-                    st.success(f"Task created successfully!")
-                    data = response.json()
-                    st.json(data)
-                    st.session_state.current_task = data["id"]
-                    st.session_state.current_task_name = task_name
-                else:
-                    st.error("Failed to create task")
-
-    with tab3:
-        st.subheader("Task Details")
-        task_id = st.text_input("Task ID", value=st.session_state.current_task or "")
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            if st.button("Check Status"):
-                if task_id:
-                    response = api_client.get_task_status(task_id)
-                    if response.status_code == 200:
-                        task_data = response.json()
                         st.markdown("### Task Information")
                         st.markdown(f"- **Status**: {render_task_status(task_data['status'])}")
 
@@ -175,8 +161,8 @@ def main():
                         st.markdown(f"- **Created Time**: {task_data['create_time']}")
                         if task_data["result"]:
                             if task_data["status"] == "completed":
-                                st.markdown("### Task Result")
                                 if os.path.exists(task_data["result"]):
+                                    st.markdown("### Task Result")
                                     st.video(task_data["result"])
                                     with open(task_data["result"], "rb") as f:
                                         st.download_button(
@@ -187,21 +173,61 @@ def main():
                                         )
                             else:
                                 st.markdown(f"```{task_data['result']}```")
-                    else:
-                        st.error("Failed to retrieve task status")
-                else:
-                    st.warning("Please enter a Task ID")
 
-        with col2:
-            if st.button("Cancel Task"):
-                if task_id:
-                    response = api_client.cancel_task(task_id)
-                    if response.status_code == 200:
-                        st.success("Task has been canceled")
-                    else:
-                        st.error("Failed to cancel task")
+                        if st.button("Rerun Task"):
+                            response = api_client.create_task(task_data["name"])
+                            if response.status_code == 200:
+                                st.success("Task rerun successfully!")
+                            else:
+                                st.error("Failed to rerun task")
+
+                        if st.button("Cancel Task"):
+                            response = api_client.cancel_task(task_id)
+                            if response.status_code == 200:
+                                st.success("Task has been canceled")
+                            else:
+                                st.error("Failed to cancel task")
                 else:
-                    st.warning("Please enter a Task ID")
+                    st.info("No task records for the selected date")
+            else:
+                st.error("Failed to retrieve task list")
+
+    with tab2:
+        hot_list = get_hot_list()
+        if hot_list:
+            st.subheader("Hot List")
+            hot_dict = {data["name"]: data["data"] for data in hot_list["data"]}
+            selected_hot = st.selectbox("Select Hot List", hot_dict.keys())
+            selected_hot_data = hot_dict[selected_hot]
+            df = pd.DataFrame(selected_hot_data, columns=["index", "title", "hot", "url"])
+            event = st.dataframe(
+                df,
+                height=(len(df) + 1) * 35 + 3,
+                hide_index=True,
+                use_container_width=True,
+                on_select="rerun",
+                selection_mode="single-row",
+                column_config={"url": st.column_config.LinkColumn()},
+            )
+            if event.selection["rows"]:
+                row = df.iloc[event.selection["rows"][0]]
+                st.session_state.current_task_name = row["url"]
+            else:
+                st.session_state.current_task_name = None
+
+        st.subheader("Create New Task")
+        with st.form("create_task_form"):
+            task_name = st.text_input("Task Name", value=st.session_state.current_task_name or "")
+            submitted = st.form_submit_button("Create Task")
+            if submitted and task_name:
+                response = api_client.create_task(task_name)
+                if response.status_code == 200:
+                    st.success("Task created successfully!")
+                    data = response.json()
+                    st.json(data)
+                    st.session_state.current_task_name = task_name
+                else:
+                    st.error("Failed to create task")
 
 
 base_url = f"http://localhost:{config.api.app_port}"

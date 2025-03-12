@@ -55,7 +55,7 @@ async def merge_videos(
 
     try:
         subprocess.run(command, check=True)
-        logger.info(f"Video created successfully.")
+        logger.info("Video created successfully.")
     except subprocess.CalledProcessError as e:
         logger.error(f"FFMPEG error: {e}")
     except Exception as e:
