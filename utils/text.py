@@ -3,14 +3,20 @@ from typing import List
 
 
 def split_content_with_punctuation(content: str, min_length: int = 10) -> List[str]:
+    if not content:
+        raise ValueError("Content cannot be empty.")
+
     punctuation_pattern = r"([。！？；])"
     parts = re.split(punctuation_pattern, content)
 
     sentences = []
-    for i in range(0, len(parts) - 1, 2):
-        sentence = parts[i].strip() + (parts[i + 1] if i + 1 < len(parts) else "")
-        if sentence.strip():
-            sentences.append(sentence)
+    if len(parts) > 1:
+        for i in range(0, len(parts) - 1, 2):
+            sentence = parts[i].strip() + (parts[i + 1] if i + 1 < len(parts) else "")
+            if sentence.strip():
+                sentences.append(sentence)
+    elif parts:
+        sentences.append(parts[0].strip())
 
     contents = []
     current_sentence = ""

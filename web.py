@@ -118,12 +118,7 @@ def main():
     tab1, tab2 = st.tabs(["Task List", "Create Task"])
 
     with tab1:
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            task_date = st.date_input("Select Date", datetime.date.today())
-        with col2:
-            if st.button("Refresh"):
-                st.rerun()
+        task_date = st.date_input("Select Date", datetime.date.today())
 
         if task_date:
             response = api_client.get_task_list(task_date)
@@ -139,7 +134,7 @@ def main():
                         column_config={"name": st.column_config.LinkColumn(validate=r"^https?://.+$")},
                     )
                     if event.selection["rows"]:
-                        task_data = df.iloc[event.selection["rows"][0]]
+                        task_data = df.iloc[event.selection["rows"][0]].to_dict()
                         task_id = task_data["id"]
 
                         if st.button("Check Status"):
@@ -148,7 +143,7 @@ def main():
                                 task_data = response.json()
 
                         st.markdown("### Task Information")
-                        st.markdown(f"- **Status**: {render_task_status(task_data['status'])}")
+                        st.json(task_data)
 
                         folder = parse_url("", int(task_id))
                         file_json = os.path.join(folder, "_script.json")
@@ -158,7 +153,6 @@ def main():
                                 json_data = json.load(f)
                                 expander.json(json_data)
 
-                        st.markdown(f"- **Created Time**: {task_data['create_time']}")
                         if task_data["result"]:
                             if task_data["status"] == "completed":
                                 if os.path.exists(task_data["result"]):
@@ -200,6 +194,8 @@ def main():
             selected_hot = st.selectbox("Select Hot List", hot_dict.keys())
             selected_hot_data = hot_dict[selected_hot]
             df = pd.DataFrame(selected_hot_data, columns=["index", "title", "hot", "url"])
+            df["title"] = df["url"] + "#" + df["title"]
+            df.drop(columns=["url"], inplace=True)
             event = st.dataframe(
                 df,
                 height=(len(df) + 1) * 35 + 3,
@@ -207,11 +203,12 @@ def main():
                 use_container_width=True,
                 on_select="rerun",
                 selection_mode="single-row",
-                column_config={"url": st.column_config.LinkColumn()},
+                column_config={"title": st.column_config.LinkColumn(display_text=r"#(.*?)$")},
             )
             if event.selection["rows"]:
                 row = df.iloc[event.selection["rows"][0]]
-                st.session_state.current_task_name = row["url"]
+                url = row["title"].split("#")[0]
+                st.session_state.current_task_name = url
             else:
                 st.session_state.current_task_name = None
 
