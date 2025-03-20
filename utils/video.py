@@ -7,7 +7,7 @@ from typing import List
 from moviepy import AudioFileClip, CompositeVideoClip, VideoClip, VideoFileClip, vfx
 
 from schemas.config import VideoConfig
-from schemas.video import Dialogue, MaterialInfo
+from schemas.video import MaterialInfo, VideoTranscript
 from utils.log import logger
 from utils.subtitle import create_subtitle
 
@@ -40,7 +40,7 @@ async def merge_videos(
         "-i",
         background_audio,
         "-filter_complex",
-        "[1:a]volume=0.3[v1];[0:a][v1]amerge=inputs=2[a]",
+        "[1:a]volume=0.2[v1];[0:a][v1]amerge=inputs=2[a]",
         "-map",
         "0:v",
         "-map",
@@ -92,11 +92,22 @@ def resize_video(video: VideoFileClip, video_width: int, video_height: int) -> V
     return video
 
 
+def formatter_text(text: str) -> str:
+    text = text.replace("‘", "“").replace("’", "”").strip()
+    return text
+
+
 async def create_video(
-    videos: List[MaterialInfo], dialogues: List[Dialogue], folder: str, output_file: str, video_config: VideoConfig
+    videos: List[MaterialInfo],
+    video_transcript: VideoTranscript,
+    folder: str,
+    output_file: str,
+    video_config: VideoConfig,
 ) -> VideoClip:
     logger.info("Creating video...")
 
+    title = video_transcript.title
+    dialogues = video_transcript.dialogues
     total = len(dialogues)
     for i, dialogue in enumerate(dialogues):
         logger.info(f"Creating video {i+1}/{total}")
@@ -111,8 +122,21 @@ async def create_video(
         txt_clips = []
         duration_start = 0
 
+        if i == 0:
+            title = formatter_text(title)
+
+            video_sub = video.subclipped(duration_start, duration_start + video_config.title.duration).with_start(
+                duration_start
+            )
+            txt_clip = await create_subtitle(title, video_config.width, video_config.height, video_config.title)
+            txt_clip = txt_clip.with_duration(video_config.title.duration).with_start(duration_start)
+
+            final_videos.append(video_sub)
+            txt_clips.append(txt_clip)
+            duration_start += video_config.title.duration
+
         for j, text in enumerate(texts):
-            text = text.replace("‘", "“").replace("’", "”").strip()
+            text = formatter_text(text)
 
             audio_file = os.path.join(folder, f"{i}_{j}.mp3")
             audio = AudioFileClip(audio_file)

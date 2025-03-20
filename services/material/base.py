@@ -30,11 +30,18 @@ class MaterialHelper(ABC):
         for video in video_items:
             if video.url in urls:
                 continue
-            if video.duration > audio_length:
+            if video.duration > audio_length + 1:
                 diff = video.duration - audio_length
                 if diff < min_diff:
                     min_diff = diff
                     closest_video = video
+
+        for video in video_items:
+            if video.url in urls:
+                continue
+            if audio_length + 1 < video.duration < audio_length * 1.5 + 1:
+                closest_video = video
+                break
 
         return closest_video
 
@@ -72,6 +79,8 @@ class MaterialHelper(ABC):
             video_path = await self.save_video(video_url)
             if video_path:
                 video.video_path = video_path
+            else:
+                raise ValueError("Video has no path")
         return videos
 
     async def save_video(self, video_url: str, save_dir: str = "./cache_videos") -> str:

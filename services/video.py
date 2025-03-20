@@ -278,7 +278,7 @@ class VideoGenerator:
             videos = await self._process_videos(video_transcript, durations, files)
 
             # Create final video
-            await create_video(videos, video_transcript.dialogues, files.folder, files.output, self.config.video)
+            await create_video(videos, video_transcript, files.folder, files.output, self.config.video)
 
             return files.output if os.path.exists(files.output) else None
 

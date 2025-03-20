@@ -65,13 +65,19 @@ class SubtitleConfig(BaseModel):
     text_align: str = "center"
 
 
+class TitleConfig(SubtitleConfig):
+    model_config = ConfigDict(from_attributes=True)
+    duration: float = 0.5
+
+
 class VideoConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     fps: int
     background_audio: str
     width: int
     height: int
-    subtitle: Optional[SubtitleConfig] = None
+    title: TitleConfig
+    subtitle: SubtitleConfig
 
 
 class ApiConfig(BaseModel):

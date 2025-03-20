@@ -156,7 +156,18 @@ background_audio = "./resource/bgm.mp3"
 width = 1080
 height = 1920
 
-[subtitle]
+[video.title]
+font = "./fonts/DreamHanSans-W20.ttc"
+width_ratio = 0.8
+font_size_ratio = 12
+position_ratio = 0.5
+color = "white"
+stroke_color = "black"
+stroke_width = 2
+text_align = "center"
+duration = 0.5
+
+[video.subtitle]
 font = "./fonts/DreamHanSans-W20.ttc"
 width_ratio = 0.8
 font_size_ratio = 17

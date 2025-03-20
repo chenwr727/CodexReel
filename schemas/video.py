@@ -11,14 +11,8 @@ class Dialogue(BaseModel):
 
 class VideoTranscript(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    platform: str = ""
-    audience: str = ""
     title: str
-    quotes: str = ""
-    information: List[str] = []
     dialogues: List[Dialogue]
-    interaction: str = ""
-    effect: str = ""
 
 
 class MaterialInfo(BaseModel):
