@@ -8,6 +8,7 @@ fastapi
 kokoro
 moviepy
 openai
+pycryptodome
 Requests
 soundfile
 sqlalchemy

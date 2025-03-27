@@ -52,7 +52,7 @@ class PixabayHelper(MaterialHelper):
         return video_items
 
     @alru_cache()
-    async def search_videos(self, search_term: str, page: int, per_page: int = 20) -> List[MaterialInfo]:
+    async def search_videos(self, search_term: str, page: int, per_page: int = 100) -> List[MaterialInfo]:
         params = {
             "key": self.api_key,
             "q": search_term,

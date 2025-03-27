@@ -21,7 +21,7 @@ class TaskService:
         cls._running_tasks = max(0, cls._running_tasks - 1)
 
     @classmethod
-    async def process_task(cls, task_id: int, name: str):
+    async def process_task(cls, task_id: int, name: str, task_type: str):
         try:
             async with cls._semaphore:
                 cls._running_tasks += 1
@@ -35,7 +35,7 @@ class TaskService:
 
                     try:
                         result = await asyncio.wait_for(
-                            url2video(name, task_id),
+                            url2video(name, task_id, task_type),
                             timeout=float(settings.task_timeout_seconds),
                         )
 

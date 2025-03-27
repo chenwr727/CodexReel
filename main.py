@@ -6,9 +6,9 @@ from services.video import VideoGenerator
 from utils.log import logger
 
 
-async def url2video(url: str, doc_id: Optional[int] = None) -> Optional[str]:
+async def url2video(url: str, doc_id: Optional[int] = None, copywriter_type: Optional[str] = None) -> Optional[str]:
     generator = VideoGenerator()
-    return await generator.generate_video(url, doc_id)
+    return await generator.generate_video(url, doc_id, copywriter_type)
 
 
 async def main():

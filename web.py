@@ -9,6 +9,7 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
+from schemas.config import PromptSource
 from utils.config import config
 from utils.url import parse_url
 
@@ -17,9 +18,9 @@ class TaskAPIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
 
-    def create_task(self, name: str) -> requests.Response:
+    def create_task(self, name: str, task_type: str) -> requests.Response:
         url = f"{self.base_url}/v1/tasks"
-        return requests.post(url, json={"name": name})
+        return requests.post(url, json={"name": name, "task_type": task_type})
 
     def get_task_status(self, task_id: str) -> requests.Response:
         url = f"{self.base_url}/v1/tasks/{task_id}"
@@ -115,6 +116,9 @@ def main():
     if not handle_authentication(authenticator):
         return
 
+    copywriter_types = [e.value for e in PromptSource]
+    copywriter_type = st.selectbox("Select Copywriter Type", copywriter_types)
+
     tab1, tab2 = st.tabs(["Task List", "Create Task"])
 
     with tab1:
@@ -169,7 +173,7 @@ def main():
                                 st.markdown(f"```{task_data['result']}```")
 
                         if st.button("Rerun Task"):
-                            response = api_client.create_task(task_data["name"])
+                            response = api_client.create_task(task_data["name"], copywriter_type)
                             if response.status_code == 200:
                                 st.success("Task rerun successfully!")
                             else:
@@ -181,6 +185,15 @@ def main():
                                 st.success("Task has been canceled")
                             else:
                                 st.error("Failed to cancel task")
+
+                        if st.button("Reset Task"):
+                            for filename in os.listdir(folder):
+                                if filename == "_html.txt":
+                                    continue
+                                file_path = os.path.join(folder, filename)
+                                if os.path.isfile(file_path):
+                                    os.remove(file_path)
+                            st.success("Task has been reset")
                 else:
                     st.info("No task records for the selected date")
             else:
@@ -217,7 +230,7 @@ def main():
             task_name = st.text_input("Task Name", value=st.session_state.current_task_name or "")
             submitted = st.form_submit_button("Create Task")
             if submitted and task_name:
-                response = api_client.create_task(task_name)
+                response = api_client.create_task(task_name, copywriter_type)
                 if response.status_code == 200:
                     st.success("Task created successfully!")
                     data = response.json()

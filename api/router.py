@@ -18,7 +18,7 @@ tasks_router = APIRouter()
 async def create_task(task: TaskCreate, session: AsyncSession = Depends(get_session)):
     db_task = await crud.create_task(session, task)
 
-    background_task = asyncio.create_task(TaskService.process_task(db_task.id, db_task.name))
+    background_task = asyncio.create_task(TaskService.process_task(db_task.id, db_task.name, task.task_type))
     TaskService._background_tasks[db_task.id] = background_task
 
     return db_task

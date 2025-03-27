@@ -1,18 +1,18 @@
 English | [简体中文](README_CN.md)
 
 <div align="center">
-    <h1>Article2VideoMagic</h1>
-    <p>🎬 Turn any article into engaging video content with a single click!</p>
+    <h1>⚡ CodexReel: Where AI Meets Video Rendering</h1>
+    <h3>🚀 Transform Articles into Viral-Ready Video Reels with AI-Powered Precision</h3>
     <p>
         <img src="https://img.shields.io/badge/license-MIT-green" alt="license">
-        <img src="https://img.shields.io/github/stars/chenwr727/Article2VideoMagic" alt="stars">
-        <img src="https://img.shields.io/github/forks/chenwr727/Article2VideoMagic" alt="forks">
+        <img src="https://img.shields.io/github/stars/chenwr727/CodexReel" alt="stars">
+        <img src="https://img.shields.io/github/forks/chenwr727/CodexReel" alt="forks">
     </p>
 </div>
 
 ## 📖 Project Introduction
 
-Article2VideoMagic is an innovative automated video generation tool that can intelligently convert any article into lively and interesting dialogue videos. This project draws inspiration from NotebookLlama and leverages advanced AI technology to achieve full-process automation from text to video production.
+CodexReel is a next-generation AI video content engine that leverages cutting-edge multimodal LLM technology to intelligently transform ordinary articles into professionally-produced interactive dialogue videos.
 
 ### ✨ Key Features
 
@@ -72,8 +72,8 @@ Article2VideoMagic is an innovative automated video generation tool that can int
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/chenwr727/Article2VideoMagic.git
-cd Article2VideoMagic
+git clone https://github.com/chenwr727/CodexReel.git
+cd CodexReel
 ```
 
 2. Create and activate conda environment:
@@ -104,7 +104,7 @@ copy config-template.toml config.toml
 ## 📂 Project Structure
 
 ```
-Article2VideoMagic/
+CodexReel/
 ├── api/                    # API interface module
 │   ├── crud.py             # Database operations
 │   ├── database.py         # Database configuration
@@ -116,15 +116,23 @@ Article2VideoMagic/
 │   ├── task.py             # Task model
 │   └── video.py            # Video model
 ├── services/               # External service integration
+│   ├── material/           # Material service
+│   │   ├── base.py         # Material service interface
+│   │   ├── pexels.py       # Pexels video material service
+│   │   └── pixabay.py      # Pixabay video material service
+│   ├── tts/                # Voice synthesis service
+│   │   ├── base.py         # Voice synthesis service interface
+│   │   ├── dashscope.py    # DashScope voice synthesis service
+│   │   ├── edge.py         # Edge voice synthesis service
+│   │   └── kokoro.py       # Kokoro voice synthesis service
 │   ├── llm.py              # LLM service
-│   ├── pexels.py           # Video material service
-│   ├── tts.py              # Voice synthesis service
 │   └── video.py            # Video processing service
 ├── utils/                  # Utility modules
 │   ├── config.py           # Configuration management
 │   ├── log.py              # Logging tools
 │   ├── subtitle.py         # Subtitle handling
 │   ├── text.py             # Text processing
+│   ├── url.py              # URL handling
 │   └── video.py            # Video tools
 └── web.py                  # Web interface entry point
 ```

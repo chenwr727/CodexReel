@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from schemas.config import MaterialSource, TTSSource
 from schemas.video import MaterialInfo, VideoTranscript
 from services.llm import LLmWriter
-from utils.config import config
+from utils.config import config, get_prompt_config
 from utils.log import logger
 from utils.text import split_content_with_punctuation
 from utils.url import get_content, parse_url
@@ -63,7 +63,7 @@ class VideoGenerator:
             logger.info("Draft file already exists")
             return self._read_file(files.draft)
 
-        text_writer = await self.assistant.writer(content, self.config.llm.prompt_writer)
+        text_writer = await self.assistant.writer(content, self.config.prompt.prompt_writer)
         if text_writer:
             self._write_file(files.draft, text_writer)
             return text_writer
@@ -76,7 +76,7 @@ class VideoGenerator:
             logger.info("Reflection file already exists")
             return self._read_file(files.reflected)
 
-        text_reflector = await self.assistant.writer(draft, self.config.llm.prompt_reflector)
+        text_reflector = await self.assistant.writer(draft, self.config.prompt.prompt_reflector)
         if text_reflector:
             self._write_file(files.reflected, text_reflector)
             return text_reflector
@@ -87,7 +87,7 @@ class VideoGenerator:
         logger.info("Starting to generate final transcript")
         text_rewriter = await self.assistant.writer(
             f"初稿：\n{draft}\n\n评审意见：\n{reflection}",
-            self.config.llm.prompt_rewriter,
+            self.config.prompt.prompt_rewriter,
             response_format={"type": "json_object"},
         )
         if not text_rewriter:
@@ -235,7 +235,9 @@ class VideoGenerator:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(content, f, ensure_ascii=False, indent=4)
 
-    async def generate_video(self, url: str, doc_id: Optional[int] = None) -> Optional[str]:
+    async def generate_video(
+        self, url: str, doc_id: Optional[int] = None, copywriter_type: Optional[str] = None
+    ) -> Optional[str]:
         """Main method to generate video from URL or text content."""
         try:
             logger.info(f"Starting video generation for {url}")
@@ -249,6 +251,8 @@ class VideoGenerator:
 
             # Process content and generate transcript
             if not os.path.exists(files.script):
+                self.config.prompt = get_prompt_config(copywriter_type)
+
                 content = await self._get_content_from_source(url, files)
                 if not content:
                     raise ValueError("Failed to fetch content from source")

@@ -18,6 +18,11 @@ class TextToSpeechConverter(ABC):
     async def text_to_speech(self, dialogues: List[Dialogue]):
         durations = []
 
+        speaker = set()
+        for dialogue in dialogues:
+            speaker.add(dialogue.speaker)
+        self.voices = self.voices[: len(speaker)]
+
         total = len(dialogues)
         for i, dialogue in enumerate(dialogues):
             logger.info(f"Generating audio {i+1}/{total}")

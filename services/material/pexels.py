@@ -56,7 +56,7 @@ class PexelsHelper(MaterialHelper):
         return video_items
 
     @alru_cache()
-    async def search_videos(self, search_term: str, page: int, per_page: int = 20) -> List[MaterialInfo]:
+    async def search_videos(self, search_term: str, page: int, per_page: int = 80) -> List[MaterialInfo]:
         params = {"query": search_term, "orientation": self.video_orientation, "page": page, "per_page": per_page}
         if self.locale:
             params["locale"] = self.locale

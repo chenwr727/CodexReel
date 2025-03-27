@@ -1,18 +1,18 @@
 简体中文 | [English](README.md)
 
 <div align="center">
-    <h1>Article2VideoMagic</h1>
-    <p>🎬 一键将文章转换为引人入胜的视频内容！</p>
+    <h1>⚡ CodexReel: 让AI替你拍短视频</h1>
+    <p>🚀 用AI精准打造爆款短视频，文章秒变流量密码</p>
     <p>
         <img src="https://img.shields.io/badge/license-MIT-green" alt="license">
-        <img src="https://img.shields.io/github/stars/chenwr727/Article2VideoMagic" alt="stars">
-        <img src="https://img.shields.io/github/forks/chenwr727/Article2VideoMagic" alt="forks">
+        <img src="https://img.shields.io/github/stars/chenwr727/CodexReel" alt="stars">
+        <img src="https://img.shields.io/github/forks/chenwr727/CodexReel" alt="forks">
     </p>
 </div>
 
 ## 📖 项目介绍
 
-Article2VideoMagic 是一个创新的自动化视频生成工具，能够将任意文章智能转化为生动有趣的对话视频。本项目参考 NotebookLlama，通过先进的 AI 技术，实现从文本到视频的全流程自动化制作。
+CodexReel 是新一代AI视频内容生成引擎，采用最前沿的多模态大模型技术，将普通文章智能转化为具有专业制作水准的互动式对话视频。
 
 ### ✨ 特色功能
 
@@ -72,8 +72,8 @@ Article2VideoMagic 是一个创新的自动化视频生成工具，能够将任�
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/chenwr727/Article2VideoMagic.git
-cd Article2VideoMagic
+git clone https://github.com/chenwr727/CodexReel.git
+cd CodexReel
 ```
 
 2. 创建并激活 conda 环境：
@@ -104,7 +104,7 @@ copy config-template.toml config.toml
 ## 📂 项目结构
 
 ```
-Article2VideoMagic/
+CodexReel/
 ├── api/                    # API接口模块
 │   ├── crud.py             # 数据库操作
 │   ├── database.py         # 数据库配置
@@ -116,15 +116,23 @@ Article2VideoMagic/
 │   ├── task.py             # 任务模型
 │   └── video.py            # 视频模型
 ├── services/               # 外部服务集成
+│   ├── material/           # 视频素材服务
+│   │   ├── base.py         # 视频素材基础接口
+│   │   ├── pexels.py       # Pexels服务
+│   │   └── pixabay.py      # Pixabay服务
+│   ├── tts/                # TTS服务
+│   │   ├── base.py         # TTS基础接口
+│   │   ├── dashscope.py    # DashScope服务
+│   │   ├── edge.py         # Edge服务
+│   │   └── kokoro.py       # Kokoro服务
 │   ├── llm.py              # LLM服务
-│   ├── pexels.py           # 视频素材服务
-│   ├── tts.py              # 语音合成服务
 │   └── video.py            # 视频处理服务
 ├── utils/                  # 工具模块
 │   ├── config.py           # 配置管理
 │   ├── log.py              # 日志工具
 │   ├── subtitle.py         # 字幕处理
 │   ├── text.py             # 文本处理
+│   ├── url.py              # URL处理
 │   └── video.py            # 视频工具
 └── web.py                  # Web界面入口
 ```

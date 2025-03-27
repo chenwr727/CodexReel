@@ -4,6 +4,12 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 
 
+class PromptSource(str, Enum):
+    crosstalk = "crosstalk"
+    talkshow = "talkshow"
+    book = "book"
+
+
 class TTSSource(str, Enum):
     dashscope = "dashscope"
     edge = "edge"
@@ -20,9 +26,13 @@ class LLMConfig(BaseModel):
     api_key: str
     base_url: str
     model: str
-    prompt_writer: str
-    prompt_reflector: str
-    prompt_rewriter: str
+    prompt: PromptSource = PromptSource.crosstalk
+
+
+class PromptConfig(BaseModel):
+    prompt_writer: str = ""
+    prompt_reflector: str = ""
+    prompt_rewriter: str = ""
 
 
 class TTSDashscopeConfig(BaseModel):
@@ -113,6 +123,7 @@ class MaterialConfig(BaseModel):
 class Config(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     llm: LLMConfig
+    prompt: Optional[PromptConfig] = None
     tts: TTSConfig
     video: VideoConfig
     api: ApiConfig
