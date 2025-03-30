@@ -1,7 +1,7 @@
 import asyncio
-from datetime import datetime
 from typing import Dict
 
+from api.schemas import TaskCreate
 from main import url2video
 from utils.config import api_config as settings
 
@@ -21,21 +21,18 @@ class TaskService:
         cls._running_tasks = max(0, cls._running_tasks - 1)
 
     @classmethod
-    async def process_task(cls, task_id: int, name: str, task_type: str):
+    async def process_task(cls, task_id: int, task_create: TaskCreate):
         try:
             async with cls._semaphore:
                 cls._running_tasks += 1
 
                 async with AsyncSessionLocal() as session:
                     task = await crud.get_task(session, task_id)
-                    if task:
-                        task.status = TaskStatus.RUNNING
-                        task.start_time = datetime.now()
-                        await session.commit()
+                    await crud.update_task_status(session, task, TaskStatus.RUNNING)
 
                     try:
                         result = await asyncio.wait_for(
-                            url2video(name, task_id, task_type),
+                            url2video(task_create, task_id),
                             timeout=float(settings.task_timeout_seconds),
                         )
 

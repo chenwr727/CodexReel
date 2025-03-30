@@ -9,9 +9,11 @@ kokoro
 moviepy
 openai
 pycryptodome
+pre-commit
 Requests
 soundfile
 sqlalchemy
 streamlit
+streamlit_authenticator
 toml
 uvicorn

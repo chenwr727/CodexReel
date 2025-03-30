@@ -6,7 +6,9 @@ from pydantic import BaseModel
 
 class TaskCreate(BaseModel):
     name: str
-    task_type: Optional[str] = None
+    prompt_source: Optional[str] = None
+    tts_source: Optional[str] = None
+    material_source: Optional[str] = None
 
 
 class TaskResponse(BaseModel):

@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api import crud
 from api.database import get_session
 from api.models import TaskStatus
+from api.schemas import TaskCreate, TaskResponse
 from api.service import TaskService
-from schemas.task import TaskCreate, TaskResponse
 from utils.config import api_config as settings
 
 tasks_router = APIRouter()
@@ -18,7 +18,7 @@ tasks_router = APIRouter()
 async def create_task(task: TaskCreate, session: AsyncSession = Depends(get_session)):
     db_task = await crud.create_task(session, task)
 
-    background_task = asyncio.create_task(TaskService.process_task(db_task.id, db_task.name, task.task_type))
+    background_task = asyncio.create_task(TaskService.process_task(db_task.id, task))
     TaskService._background_tasks[db_task.id] = background_task
 
     return db_task

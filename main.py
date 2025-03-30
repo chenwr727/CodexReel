@@ -2,13 +2,14 @@ import argparse
 import asyncio
 from typing import Optional
 
+from api.schemas import TaskCreate
 from services.video import VideoGenerator
 from utils.log import logger
 
 
-async def url2video(url: str, doc_id: Optional[int] = None, copywriter_type: Optional[str] = None) -> Optional[str]:
+async def url2video(task_create: TaskCreate, doc_id: Optional[int] = None) -> Optional[str]:
     generator = VideoGenerator()
-    return await generator.generate_video(url, doc_id, copywriter_type)
+    return await generator.generate_video(task_create, doc_id)
 
 
 async def main():
@@ -17,7 +18,8 @@ async def main():
     parser.add_argument("--doc-id", type=int, help="Optional document ID", default=None)
     args = parser.parse_args()
 
-    result = await url2video(args.url, args.doc_id)
+    task_create = TaskCreate(name=args.url)
+    result = await url2video(task_create, args.doc_id)
 
     if result:
         if result == "Script":

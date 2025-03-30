@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from api.schemas import TaskCreate
 from schemas.config import MaterialSource, TTSSource
 from schemas.video import MaterialInfo, VideoTranscript
 from services.llm import LLmWriter
@@ -108,13 +109,16 @@ class VideoGenerator:
         video_transcript = VideoTranscript.model_validate(transcript_data)
         return video_transcript
 
-    async def _process_audio(self, video_transcript: VideoTranscript, files: ProcessingFiles) -> List[float]:
+    async def _process_audio(
+        self, video_transcript: VideoTranscript, files: ProcessingFiles, tts_source: Optional[str] = None
+    ) -> List[float]:
         """Process audio for the video."""
         logger.info("Starting to process audio")
         if os.path.exists(files.durations):
             return json.loads(self._read_file(files.durations))
 
-        if self.config.tts.source == TTSSource.dashscope:
+        tts_source = tts_source or self.config.tts.source
+        if tts_source == TTSSource.dashscope:
             from services.tts import DashscopeTextToSpeechConverter
 
             converter = DashscopeTextToSpeechConverter(
@@ -123,11 +127,20 @@ class VideoGenerator:
                 self.config.tts.dashscope.voices,
                 files.folder,
             )
-        elif self.config.tts.source == TTSSource.edge:
+        elif tts_source == TTSSource.edge:
             from services.tts import EdgeTextToSpeechConverter
 
             converter = EdgeTextToSpeechConverter(self.config.tts.edge.voices, files.folder)
-        elif self.config.tts.source == TTSSource.kokoro:
+        elif tts_source == TTSSource.hailuo:
+            from services.tts import HaiLuoTextToSpeechConverter
+
+            converter = HaiLuoTextToSpeechConverter(
+                self.config.tts.hailuo.api_key,
+                self.config.tts.hailuo.base_url,
+                self.config.tts.hailuo.voices,
+                files.folder,
+            )
+        elif tts_source == TTSSource.kokoro:
             from services.tts import KokoroTextToSpeechConverter
 
             converter = KokoroTextToSpeechConverter(
@@ -144,7 +157,11 @@ class VideoGenerator:
         return durations
 
     async def _process_videos(
-        self, video_transcript: VideoTranscript, durations: List[float], files: ProcessingFiles
+        self,
+        video_transcript: VideoTranscript,
+        durations: List[float],
+        files: ProcessingFiles,
+        material_source: Optional[str] = None,
     ) -> List[MaterialInfo]:
         """Process videos for the final output."""
         logger.info("Starting to process videos")
@@ -154,7 +171,8 @@ class VideoGenerator:
 
         search_terms = await self._get_search_terms(video_transcript, files)
 
-        if self.config.material.source == MaterialSource.pexels:
+        material_source = material_source or self.config.material.source
+        if material_source == MaterialSource.pexels:
             from services.material import PexelsHelper
 
             material_helper = PexelsHelper(
@@ -164,7 +182,7 @@ class VideoGenerator:
                 self.config.video.width,
                 self.config.video.height,
             )
-        elif self.config.material.source == MaterialSource.pixabay:
+        elif material_source == MaterialSource.pixabay:
             from services.material import PixabayHelper
 
             material_helper = PixabayHelper(
@@ -235,11 +253,10 @@ class VideoGenerator:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(content, f, ensure_ascii=False, indent=4)
 
-    async def generate_video(
-        self, url: str, doc_id: Optional[int] = None, copywriter_type: Optional[str] = None
-    ) -> Optional[str]:
+    async def generate_video(self, task_create: TaskCreate, doc_id: Optional[int] = None) -> Optional[str]:
         """Main method to generate video from URL or text content."""
         try:
+            url = task_create.name
             logger.info(f"Starting video generation for {url}")
             folder = parse_url(url, doc_id)
             files = ProcessingFiles(folder)
@@ -251,7 +268,7 @@ class VideoGenerator:
 
             # Process content and generate transcript
             if not os.path.exists(files.script):
-                self.config.prompt = get_prompt_config(copywriter_type)
+                self.config.prompt = get_prompt_config(task_create.prompt_source)
 
                 content = await self._get_content_from_source(url, files)
                 if not content:
@@ -278,8 +295,8 @@ class VideoGenerator:
             video_transcript = await self._convert_to_transcript(transcript_data)
 
             # Generate audio and video
-            durations = await self._process_audio(video_transcript, files)
-            videos = await self._process_videos(video_transcript, durations, files)
+            durations = await self._process_audio(video_transcript, files, task_create.tts_source)
+            videos = await self._process_videos(video_transcript, durations, files, task_create.material_source)
 
             # Create final video
             await create_video(videos, video_transcript, files.folder, files.output, self.config.video)

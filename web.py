@@ -9,7 +9,8 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
-from schemas.config import PromptSource
+from api.schemas import TaskCreate
+from schemas.config import MaterialSource, PromptSource, TTSSource
 from utils.config import config
 from utils.url import parse_url
 
@@ -18,9 +19,9 @@ class TaskAPIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
 
-    def create_task(self, name: str, task_type: str) -> requests.Response:
+    def create_task(self, task_create: TaskCreate) -> requests.Response:
         url = f"{self.base_url}/v1/tasks"
-        return requests.post(url, json={"name": name, "task_type": task_type})
+        return requests.post(url, json=task_create.model_dump())
 
     def get_task_status(self, task_id: str) -> requests.Response:
         url = f"{self.base_url}/v1/tasks/{task_id}"
@@ -39,7 +40,7 @@ class TaskAPIClient:
         return requests.get(url)
 
 
-@st.cache_data(ttl="4h")
+@st.cache_data(ttl="2h")
 def get_hot_list():
     url = "https://api.vvhan.com/api/hotlist/all"
     try:
@@ -61,7 +62,6 @@ def format_task_data(tasks: list) -> pd.DataFrame:
     if not tasks:
         return pd.DataFrame()
     df = pd.DataFrame(tasks)
-    df["create_time"] = pd.to_datetime(df["create_time"]).dt.strftime("%Y-%m-%d %H:%M:%S")
     return df
 
 
@@ -116,8 +116,18 @@ def main():
     if not handle_authentication(authenticator):
         return
 
-    copywriter_types = [e.value for e in PromptSource]
-    copywriter_type = st.selectbox("Select Copywriter Type", copywriter_types)
+    prompt_source_list = [e.value for e in PromptSource]
+    prompt_source = st.sidebar.selectbox("Select Prompt Source", prompt_source_list)
+
+    tts_source_list = [e.value for e in TTSSource]
+    tts_source = st.sidebar.selectbox("Select TTS Source", tts_source_list)
+
+    material_source_list = [e.value for e in MaterialSource]
+    material_source = st.sidebar.selectbox("Select Material Source", material_source_list)
+
+    task_create = TaskCreate(
+        name="", prompt_source=prompt_source, tts_source=tts_source, material_source=material_source
+    )
 
     tab1, tab2 = st.tabs(["Task List", "Create Task"])
 
@@ -173,7 +183,8 @@ def main():
                                 st.markdown(f"```{task_data['result']}```")
 
                         if st.button("Rerun Task"):
-                            response = api_client.create_task(task_data["name"], copywriter_type)
+                            task_create.name = task_data["name"]
+                            response = api_client.create_task(task_create)
                             if response.status_code == 200:
                                 st.success("Task rerun successfully!")
                             else:
@@ -230,7 +241,8 @@ def main():
             task_name = st.text_input("Task Name", value=st.session_state.current_task_name or "")
             submitted = st.form_submit_button("Create Task")
             if submitted and task_name:
-                response = api_client.create_task(task_name, copywriter_type)
+                task_create.name = task_name
+                response = api_client.create_task(task_create)
                 if response.status_code == 200:
                     st.success("Task created successfully!")
                     data = response.json()

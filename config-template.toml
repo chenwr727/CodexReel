@@ -15,6 +15,11 @@ voices = ["longwan", "longcheng"]
 [tts.edge]
 voices = ["zh-CN-XiaoyiNeural", "zh-CN-YunyangNeural"]
 
+[tts.hailuo]
+api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+base_url = "http://127.0.0.1:8000/v1"
+voices = ["Podcast_girl", "male-botong"]
+
 [tts.kokoro]
 model = "./models/kokoro/kokoro-v1_1-zh.pth"
 voices = [

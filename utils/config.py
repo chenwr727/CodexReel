@@ -11,7 +11,7 @@ def load_config(config_file: str = "config.toml") -> dict:
     return config
 
 
-def get_prompt_config(copywriter_type: Optional[str] = None) -> PromptConfig:
+def get_prompt_config(prompt_source: Optional[str] = None) -> PromptConfig:
     config_mapping = {
         PromptSource.crosstalk: "./prompts/crosstalk.toml",
         PromptSource.talkshow: "./prompts/talkshow.toml",
@@ -20,7 +20,7 @@ def get_prompt_config(copywriter_type: Optional[str] = None) -> PromptConfig:
 
     default_config_path = "./prompts/crosstalk.toml"
 
-    config_path = config_mapping.get(copywriter_type, default_config_path)
+    config_path = config_mapping.get(prompt_source, default_config_path)
 
     try:
         config = load_config(config_path)

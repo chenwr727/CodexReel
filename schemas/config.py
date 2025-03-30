@@ -13,12 +13,13 @@ class PromptSource(str, Enum):
 class TTSSource(str, Enum):
     dashscope = "dashscope"
     edge = "edge"
+    hailuo = "hailuo"
     kokoro = "kokoro"
 
 
 class MaterialSource(str, Enum):
-    pexels = "pexels"
     pixabay = "pixabay"
+    pexels = "pexels"
 
 
 class LLMConfig(BaseModel):
@@ -55,11 +56,19 @@ class TTSKokoroConfig(BaseModel):
     lang_code: str = ""
 
 
+class TTSHaiLuoConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    api_key: str = ""
+    base_url: str = ""
+    voices: List[str] = []
+
+
 class TTSConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     source: TTSSource
     dashscope: Optional[TTSDashscopeConfig] = None
     edge: Optional[TTSEdgeConfig] = None
+    hailuo: Optional[TTSHaiLuoConfig] = None
     kokoro: Optional[TTSKokoroConfig] = None
 
 
