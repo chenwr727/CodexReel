@@ -5,7 +5,7 @@ from typing import List
 
 from moviepy import AudioFileClip
 
-from schemas.video import Dialogue
+from schemas.video import Paragraph
 from utils.log import logger
 
 
@@ -15,33 +15,34 @@ class TextToSpeechConverter(ABC):
         self.voices = voices
         self.folder = folder
 
-    async def text_to_speech(self, dialogues: List[Dialogue]):
+    async def text_to_speech(self, paragraphs: List[Paragraph]) -> List[float]:
         durations = []
 
-        speaker = set()
-        for dialogue in dialogues:
-            speaker.add(dialogue.speaker)
-        self.voices = self.voices[: len(speaker)]
+        speaker_voice = {}
+        idx_voice = 0
+        for paragraph in paragraphs:
+            dialogues = paragraph.dialogues
+            for dialogue in dialogues:
+                if dialogue.speaker not in speaker_voice:
+                    speaker_voice[dialogue.speaker] = self.voices[idx_voice]
+                    idx_voice += 1
 
-        total = len(dialogues)
-        for i, dialogue in enumerate(dialogues):
-            logger.info(f"Generating audio {i+1}/{total}")
-            duration = await self.process_dialogue(i, dialogue)
-            if duration:
-                durations.append(duration)
-            else:
-                logger.error(f"Error generate audio {i}")
-                raise ValueError("Error generate audio")
+        for i, paragraph in enumerate(paragraphs, start=1):
+            logger.info(f"Processing paragraph {i}/{len(paragraphs)}")
+            dialogues = paragraph.dialogues
+            duration = 0
+            for j, dialogue in enumerate(dialogues, start=1):
+                logger.info(f"Processing dialogue {j}/{len(dialogues)}")
+                file_prefix = f"{i}_{j}"
+                duration += await self.process_dialogue(speaker_voice[dialogue.speaker], dialogue.contents, file_prefix)
+            durations.append(duration)
         return durations
 
-    async def process_dialogue(self, index: int, dialogue: Dialogue, max_retries: int = 3):
+    async def process_dialogue(self, voice: str, contents: List[str], file_prefix: str, max_retries: int = 3):
         duration = 0
 
-        contents = dialogue.contents
-        voice = self.voices[index % len(self.voices)]
-
-        for i, content in enumerate(contents):
-            file_name = os.path.join(self.folder, f"{index}_{i}.mp3")
+        for i, content in enumerate(contents, start=1):
+            file_name = os.path.join(self.folder, f"{file_prefix}_{i}.mp3")
             if not os.path.exists(file_name):
                 for _ in range(max_retries):
                     try:
@@ -54,7 +55,7 @@ class TextToSpeechConverter(ABC):
                         time.sleep(3)
                         continue
                 else:
-                    logger.error(f"Error generate audio {index}_{i}")
+                    logger.error(f"Error generate audio {file_prefix}_{i}")
                     raise ValueError("Error generate audio")
                 time.sleep(3)
             duration += AudioFileClip(file_name).duration

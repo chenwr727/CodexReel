@@ -160,7 +160,7 @@ def main():
                         st.json(task_data)
 
                         folder = parse_url("", int(task_id))
-                        file_json = os.path.join(folder, "_script.json")
+                        file_json = os.path.join(folder, "_transcript.json")
                         if os.path.exists(file_json):
                             expander = st.expander("See dialogue")
                             with open(file_json, "r", encoding="utf-8") as f:
@@ -217,9 +217,7 @@ def main():
             hot_dict = {data["name"]: data["data"] for data in hot_list["data"]}
             selected_hot = st.selectbox("Select Hot List", hot_dict.keys())
             selected_hot_data = hot_dict[selected_hot]
-            df = pd.DataFrame(selected_hot_data, columns=["index", "title", "hot", "url"])
-            df["title"] = df["url"] + "#" + df["title"]
-            df.drop(columns=["url"], inplace=True)
+            df = pd.DataFrame(selected_hot_data, columns=["index", "title", "url", "hot"])
             event = st.dataframe(
                 df,
                 height=(len(df) + 1) * 35 + 3,
@@ -227,12 +225,11 @@ def main():
                 use_container_width=True,
                 on_select="rerun",
                 selection_mode="single-row",
-                column_config={"title": st.column_config.LinkColumn(display_text=r"#(.*?)$")},
+                column_config={"url": st.column_config.LinkColumn(display_text="Open")},
             )
             if event.selection["rows"]:
                 row = df.iloc[event.selection["rows"][0]]
-                url = row["title"].split("#")[0]
-                st.session_state.current_task_name = url
+                st.session_state.current_task_name = row["url"]
             else:
                 st.session_state.current_task_name = None
 

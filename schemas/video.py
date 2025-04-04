@@ -9,10 +9,16 @@ class Dialogue(BaseModel):
     contents: List[str]
 
 
+class Paragraph(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    description: str
+    dialogues: List[Dialogue]
+
+
 class VideoTranscript(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     title: str
-    dialogues: List[Dialogue]
+    paragraphs: List[Paragraph]
 
 
 class MaterialInfo(BaseModel):

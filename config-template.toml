@@ -55,6 +55,7 @@ color = "white"
 stroke_color = "black"
 stroke_width = 1
 text_align = "center"
+interval = 0.2
 
 [api]
 database_url = "sqlite+aiosqlite:///tasks.db"

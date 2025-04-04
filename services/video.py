@@ -23,10 +23,9 @@ class ProcessingFiles:
 
     def __post_init__(self):
         """Initialize all file paths after instance creation."""
-        self.script = os.path.join(self.folder, "_script.json")
+        self.script = os.path.join(self.folder, "_transcript.json")
         self.html = os.path.join(self.folder, "_html.txt")
-        self.draft = os.path.join(self.folder, "_draft.txt")
-        self.reflected = os.path.join(self.folder, "_reflected.txt")
+        self.draft = os.path.join(self.folder, "_transcript.txt")
         self.durations = os.path.join(self.folder, "_durations.json")
         self.videos = os.path.join(self.folder, "_videos.json")
         self.terms = os.path.join(self.folder, "_terms.json")
@@ -57,11 +56,11 @@ class VideoGenerator:
         self._write_file(files.html, content)
         return content
 
-    async def _generate_draft(self, content: str, files: ProcessingFiles) -> Optional[str]:
-        """Generate first draft of the video transcript."""
-        logger.info("Starting to generate draft")
+    async def _generate_transcript(self, content: str, files: ProcessingFiles) -> Optional[str]:
+        """Generate first transcript."""
+        logger.info("Starting to generate transcrip")
         if os.path.exists(files.draft):
-            logger.info("Draft file already exists")
+            logger.info("transcript file already exists")
             return self._read_file(files.draft)
 
         text_writer = await self.assistant.writer(content, self.config.prompt.prompt_writer)
@@ -70,24 +69,11 @@ class VideoGenerator:
             return text_writer
         return None
 
-    async def _generate_reflection(self, draft: str, files: ProcessingFiles) -> Optional[str]:
-        """Generate reflection on the draft."""
-        logger.info("Starting to generate reflection")
-        if os.path.exists(files.reflected):
-            logger.info("Reflection file already exists")
-            return self._read_file(files.reflected)
-
-        text_reflector = await self.assistant.writer(draft, self.config.prompt.prompt_reflector)
-        if text_reflector:
-            self._write_file(files.reflected, text_reflector)
-            return text_reflector
-        return None
-
-    async def _generate_final_transcript(self, draft: str, reflection: str) -> Optional[Dict[str, Any]]:
+    async def _generate_final_transcript(self, transcript: str) -> Optional[Dict[str, Any]]:
         """Generate final video transcript."""
         logger.info("Starting to generate final transcript")
         text_rewriter = await self.assistant.writer(
-            f"初稿：\n{draft}\n\n评审意见：\n{reflection}",
+            transcript,
             self.config.prompt.prompt_rewriter,
             response_format={"type": "json_object"},
         )
@@ -101,11 +87,14 @@ class VideoGenerator:
 
         return json.loads(json_match.group(1))
 
-    async def _convert_to_transcript(self, transcript_data: Dict[str, str | List[Dict[str, str]]]) -> VideoTranscript:
+    async def _convert_to_transcript(
+        self, transcript_data: Dict[str, str | List[Dict[str, str | List[Dict[str, str]]]]]
+    ) -> VideoTranscript:
         """Convert transcript data to VideoTranscript"""
-        for dialogue in transcript_data["dialogues"]:
-            content = dialogue.pop("content")
-            dialogue["contents"] = split_content_with_punctuation(content)
+        for paragraph in transcript_data["paragraphs"]:
+            for dialogue in paragraph["dialogues"]:
+                content = dialogue.pop("content")
+                dialogue["contents"] = split_content_with_punctuation(content)
         video_transcript = VideoTranscript.model_validate(transcript_data)
         return video_transcript
 
@@ -152,7 +141,7 @@ class VideoGenerator:
             )
         else:
             raise ValueError("Invalid TTS source")
-        durations = await converter.text_to_speech(video_transcript.dialogues)
+        durations = await converter.text_to_speech(video_transcript.paragraphs)
         self._write_json(files.durations, durations)
         return durations
 
@@ -207,10 +196,14 @@ class VideoGenerator:
         if os.path.exists(files.terms):
             return json.loads(self._read_file(files.terms))
 
-        content_list = [
-            {"id": i + 1, "content": "".join(dialogue.contents)}
-            for i, dialogue in enumerate(video_transcript.dialogues)
-        ]
+        content_list = []
+        i = 0
+        for paragraph in video_transcript.paragraphs:
+            dialogues = paragraph.dialogues
+            contents = []
+            for dialogue in dialogues:
+                contents.extend(dialogue.contents)
+            content_list.append({"id": i + 1, "content": "\n".join(contents)})
 
         for i in range(max_retries):
             logger.debug(f"Trying to get search terms {i+1}/{max_retries}")
@@ -274,15 +267,11 @@ class VideoGenerator:
                 if not content:
                     raise ValueError("Failed to fetch content from source")
 
-                draft = await self._generate_draft(content, files)
-                if not draft:
-                    raise ValueError("Failed to generate draft")
+                transcript = await self._generate_transcript(content, files)
+                if not transcript:
+                    raise ValueError("Failed to generate transcript")
 
-                reflection = await self._generate_reflection(draft, files)
-                if not reflection:
-                    raise ValueError("Failed to generate reflection")
-
-                final_transcript = await self._generate_final_transcript(draft, reflection)
+                final_transcript = await self._generate_final_transcript(transcript)
                 if not final_transcript:
                     raise ValueError("Failed to generate final transcript")
 

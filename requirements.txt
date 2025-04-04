@@ -5,6 +5,7 @@ dashscope
 edge-tts
 fake_useragent
 fastapi
+loguru
 kokoro
 moviepy
 openai

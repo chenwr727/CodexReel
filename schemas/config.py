@@ -5,9 +5,9 @@ from pydantic import BaseModel, ConfigDict
 
 
 class PromptSource(str, Enum):
+    podcast = "podcast"
     crosstalk = "crosstalk"
     talkshow = "talkshow"
-    book = "book"
 
 
 class TTSSource(str, Enum):
@@ -82,6 +82,7 @@ class SubtitleConfig(BaseModel):
     stroke_color: str = "black"
     stroke_width: int = 1
     text_align: str = "center"
+    interval: float = 0.2
 
 
 class TitleConfig(SubtitleConfig):

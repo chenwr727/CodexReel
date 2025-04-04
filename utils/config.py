@@ -12,14 +12,8 @@ def load_config(config_file: str = "config.toml") -> dict:
 
 
 def get_prompt_config(prompt_source: Optional[str] = None) -> PromptConfig:
-    config_mapping = {
-        PromptSource.crosstalk: "./prompts/crosstalk.toml",
-        PromptSource.talkshow: "./prompts/talkshow.toml",
-        PromptSource.book: "./prompts/book.toml",
-    }
-
-    default_config_path = "./prompts/crosstalk.toml"
-
+    config_mapping = {k.value: f"./prompts/{k.value}.toml" for k in PromptSource}
+    default_config_path = "./prompts/podcast.toml"
     config_path = config_mapping.get(prompt_source, default_config_path)
 
     try:

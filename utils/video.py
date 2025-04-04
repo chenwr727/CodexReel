@@ -1,4 +1,3 @@
-import gc
 import os
 import random
 import subprocess
@@ -69,7 +68,8 @@ def transition_video(video: VideoClip) -> VideoClip:
         lambda c: c.with_effects([vfx.SlideIn(0.5, shuffle_side)]),
         lambda c: c,
     ]
-    shuffle_transition = random.choice(transition_funcs)
+    probabilities = [0.4, 0.4, 0.2]
+    shuffle_transition = random.choices(transition_funcs, probabilities, k=1)[0]
     return shuffle_transition(video)
 
 
@@ -107,52 +107,52 @@ async def create_video(
     logger.info("Creating video...")
 
     title = video_transcript.title
-    dialogues = video_transcript.dialogues
-    total = len(dialogues)
-    for i, dialogue in enumerate(dialogues):
-        logger.info(f"Creating video {i+1}/{total}")
-        video_file = os.path.join(folder, f"{i}.mp4")
+    video_files = []
+    for i, paragraph in enumerate(video_transcript.paragraphs, start=1):
+        logger.info(f"Processing paragraph {i}/{len(video_transcript.paragraphs)}")
+
+        base_name = f"{i}.mp4"
+        video_file = os.path.join(folder, base_name)
+        video_files.append(base_name)
         if os.path.exists(video_file):
             continue
-
-        texts = dialogue.contents
-        video = VideoFileClip(videos[i].video_path).without_audio()
+        video = VideoFileClip(videos[i - 1].video_path).without_audio()
         video = resize_video(video, video_config.width, video_config.height)
         final_videos = []
         txt_clips = []
         duration_start = 0
 
-        if i == 0:
-            title = formatter_text(title)
+        dialogues = paragraph.dialogues
+        for j, dialogue in enumerate(dialogues, start=1):
+            logger.info(f"Processing dialogue {j}/{len(dialogues)}")
 
-            video_sub = video.subclipped(duration_start, duration_start + video_config.title.duration).with_start(
-                duration_start
-            )
-            txt_clip = await create_subtitle(title, video_config.width, video_config.height, video_config.title)
-            txt_clip = txt_clip.with_duration(video_config.title.duration).with_start(duration_start)
+            texts = dialogue.contents
 
-            final_videos.append(video_sub)
-            txt_clips.append(txt_clip)
-            duration_start += video_config.title.duration
+            for k, text in enumerate(texts, start=1):
+                if i == 1 and j == 1 and k == 1:
+                    duration_delta = video_config.title.duration
+                    title = formatter_text(title)
+                    txt_clip = await create_subtitle(title, video_config.width, video_config.height, video_config.title)
+                    txt_clip = txt_clip.with_duration(duration_delta).with_start(duration_start)
+                    txt_clips.append(txt_clip)
+                else:
+                    duration_delta = video_config.subtitle.interval
 
-        for j, text in enumerate(texts):
-            text = formatter_text(text)
+                audio_file = os.path.join(folder, f"{i}_{j}_{k}.mp3")
+                audio = AudioFileClip(audio_file)
 
-            audio_file = os.path.join(folder, f"{i}_{j}.mp3")
-            audio = AudioFileClip(audio_file)
+                text = formatter_text(text)
+                txt_clip = await create_subtitle(text, video_config.width, video_config.height, video_config.subtitle)
+                txt_clip = txt_clip.with_duration(audio.duration).with_start(duration_start + duration_delta)
+                txt_clips.append(txt_clip)
 
-            txt_clip = await create_subtitle(text, video_config.width, video_config.height, video_config.subtitle)
+                video_sub = video.subclipped(duration_start, duration_start + duration_delta + audio.duration)
+                video_sub = video_sub.with_audio(audio.with_start(duration_delta)).with_start(duration_start)
+                if i > 1 and j == 1 and k == 1:
+                    video_sub = transition_video(video_sub)
+                final_videos.append(video_sub)
 
-            video_sub = video.subclipped(duration_start, duration_start + audio.duration)
-            video_sub = video_sub.with_audio(audio).with_start(duration_start)
-            txt_clip = txt_clip.with_duration(audio.duration).with_start(duration_start)
-
-            if i > 0 and j == 0:
-                video_sub = transition_video(video_sub)
-
-            final_videos.append(video_sub)
-            txt_clips.append(txt_clip)
-            duration_start += audio.duration
+                duration_start += video_sub.duration
 
         final_video = CompositeVideoClip(final_videos + txt_clips)
 
@@ -166,19 +166,8 @@ async def create_video(
                 os.remove(video_file)
             raise e
 
-        del audio
-        del video
-        del final_videos
-        del txt_clips
-        del final_video
-
-        gc.collect()
-
     logger.info("Merging videos...")
-    video_files = [f"{i}.mp4" for i in range(len(dialogues))]
     list_file = os.path.join(folder, "listfile.txt")
     await merge_videos(video_files, output_file, list_file, video_config.background_audio)
-
-    gc.collect()
 
     return None
